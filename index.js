@@ -48,4 +48,4 @@ console.log(chalk.cyan(`\nNext steps:`));
 console.log(chalk.white(`  cd ${target}`));
 console.log(chalk.white(`  bun install`));
 console.log(chalk.white(`  bun run dev`));
-console.log(chalk.gray("\nHappy hacking. Stay fast. Stay free."));
+console.log(chalk.gray("\nHappy hacking."));
