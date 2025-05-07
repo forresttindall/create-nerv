@@ -1,5 +1,5 @@
 {
-    "name": "create-zap",
+    "name": "create-vorb",
     "version": "0.1.0",
     "description": "A blazing fast, retro-styled static site launcher using Bun + React + Vite",
     "bin": {
