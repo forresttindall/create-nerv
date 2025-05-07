@@ -7,12 +7,12 @@ import figlet from "figlet";
 import gradient from "gradient-string";
 
 const TEMPLATE_REPO = "https://github.com/forresttindall/zap-template.git";
-const target = Bun.argv[2] || "my-zap-app";
+const target = Bun.argv[2] || "my-vorb-app";
 
 // Logo header
 console.log(
   gradient.pastel(
-    figlet.textSync("ZAP", {
+    figlet.textSync("Vorb", {
       font: "Slant",
       horizontalLayout: "default",
       verticalLayout: "default",
