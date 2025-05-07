@@ -46,6 +46,30 @@ Vorb gives you everything you need to launch a static site or web app in seconds
 
 ---
 
+
+## File Structure
+
+```
+vorb-template/
+├── public/
+│   └── images/
+│       └── vorg.png
+├── src/
+│   ├── app.css
+│   ├── app.jsx
+│   ├── index.css
+│   └── main.jsx
+├── .gitignore
+├── index.html
+├── package.json
+├── vite.config.js
+├── README.md
+└── LICENSE
+```
+
+
+---
+
 ## Getting Started
 
 ### 1. Install Bun
