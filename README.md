@@ -50,7 +50,7 @@ Vorb gives you everything you need to launch a static site or web app in seconds
 ## File Structure
 
 ```
-vorb-template/
+vorb/
 ├── public/
 │   └── images/
 │       └── vorb.png

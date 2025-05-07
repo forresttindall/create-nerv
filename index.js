@@ -6,7 +6,7 @@ import ora from "ora";
 import figlet from "figlet";
 import gradient from "gradient-string";
 
-const TEMPLATE_REPO = "https://github.com/forresttindall/zap-template.git";
+const TEMPLATE_REPO = "https://github.com/forresttindall/zorb.git";
 const target = Bun.argv[2] || "my-vorb-app";
 
 // Logo header
