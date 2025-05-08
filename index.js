@@ -20,7 +20,7 @@ console.log(
   )
 );
 
-console.log(chalk.green("⚡ Blazing fast static site launcher"));
+console.log(chalk.vice("⚡ Blazing fast static site launcher"));
 console.log(chalk.magenta(`→ Creating your project in: ${chalk.bold(target)}\n`));
 
 // Clone repo
@@ -51,7 +51,7 @@ console.log(gradient.vice("\nNext steps:"));
 console.log(chalk.cyan(`  cd ${target}`));
 console.log(chalk.cyan(`  bun install`));
 console.log(chalk.cyan(`  bun run dev`));
-console.log(chalk.gray("\nOr press Y below to run these now."));
+console.log(chalk.vice("\nOr press Y below to run these now."));
 
 const rl = readline.createInterface({ input, output });
 const answer = await rl.question(chalk.bold("\nRun setup now? [Y/n] "));
