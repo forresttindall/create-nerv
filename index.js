@@ -1,10 +1,10 @@
-#!/usr/bin/env bun
-
 import { $ } from "bun";
 import chalk from "chalk";
 import ora from "ora";
 import figlet from "figlet";
 import gradient from "gradient-string";
+import readline from "readline/promises";
+import { stdin as input, stdout as output } from "node:process";
 
 const TEMPLATE_REPO = "https://github.com/forresttindall/vorb.git";
 const target = Bun.argv[2] || "my-vorb-app";
@@ -20,32 +20,59 @@ console.log(
   )
 );
 
-console.log(chalk.green("⚡ Blazing fast static app launcher"));
+console.log(chalk.green("⚡ Blazing fast static site launcher"));
 console.log(chalk.magenta(`→ Creating your project in: ${chalk.bold(target)}\n`));
 
+// Clone repo
 const cloneSpinner = ora("Cloning template...").start();
 try {
   await $`git clone ${TEMPLATE_REPO} ${target}`;
-  cloneSpinner.succeed("Template cloned.");
+  cloneSpinner.succeed("✅ Template cloned.");
 } catch (e) {
-  cloneSpinner.fail("Failed to clone the template.");
+  cloneSpinner.fail("❌ Failed to clone the template.");
   console.error(e);
   process.exit(1);
 }
 
+// Cleanup
 const cleanSpinner = ora("Cleaning up template...").start();
 try {
   await $`rm -rf ${target}/.git`;
-  cleanSpinner.succeed("Cleanup complete.");
+  cleanSpinner.succeed("🧼 Cleanup complete.");
 } catch (e) {
-  cleanSpinner.fail("Failed to clean up.");
+  cleanSpinner.fail("❌ Failed to clean up.");
   console.error(e);
   process.exit(1);
 }
 
-console.log("\n🚀 All set!");
-console.log(chalk.cyan(`\nNext steps:`));
-console.log(chalk.white(`  cd ${target}`));
-console.log(chalk.white(`  bun install`));
-console.log(chalk.white(`  bun run dev`));
-console.log(chalk.gray("\nHappy hacking."));
+// Echo next steps
+console.log(chalk.greenBright("\n🚀 All set!"));
+console.log(gradient.vice("\nNext steps:"));
+console.log(chalk.cyan(`  cd ${target}`));
+console.log(chalk.cyan(`  bun install`));
+console.log(chalk.cyan(`  bun run dev`));
+console.log(chalk.gray("\nOr press Y below to run these now."));
+
+const rl = readline.createInterface({ input, output });
+const answer = await rl.question(chalk.bold("\nRun setup now? [Y/n] "));
+rl.close();
+
+if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
+  const runSpinner = ora("Setting up project...").start();
+  try {
+    process.chdir(target);
+    await $`bun install`;
+    runSpinner.succeed("📦 Dependencies installed.");
+    await $`bun run dev`;
+  } catch (e) {
+    runSpinner.fail("❌ Setup failed.");
+    console.error(e);
+    process.exit(1);
+  }
+} else {
+  console.log(chalk.greenBright("\n👍 You can run these later:"));
+  console.log(chalk.magenta(`  cd ${target}`));
+  console.log(chalk.magenta(`  bun install`));
+  console.log(chalk.magenta(`  bun run dev`));
+  console.log(chalk.greenBright("\nHappy hacking! 💻"));
+}
