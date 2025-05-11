@@ -70,11 +70,15 @@ if (useTS) {
       `{
   "compilerOptions": {
     "target": "ESNext",
+    "useDefineForClassFields": true,
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "Node",
     "strict": true,
     "jsx": "react-jsx",
-    "allowImportingTsExtensions": true
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["src"]
 }
@@ -118,5 +122,5 @@ if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
   console.log(chalk.magenta(`  cd ${target}`));
   console.log(chalk.magenta(`  bun install`));
   console.log(chalk.magenta(`  bun run dev`));
-  console.log(chalk.greenBright("\nHappy hacking! 💻"));
+  console.log(chalk.greenBright("\nHappy hacking!"));
 }
