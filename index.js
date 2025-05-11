@@ -1,3 +1,5 @@
+#!/usr/bin/env bun
+
 import { $ } from "bun";
 import chalk from "chalk";
 import ora from "ora";
@@ -5,6 +7,7 @@ import figlet from "figlet";
 import gradient from "gradient-string";
 import readline from "readline/promises";
 import { stdin as input, stdout as output } from "node:process";
+import { writeFile } from "fs/promises";
 
 const TEMPLATE_REPO = "https://github.com/forresttindall/vorb.git";
 const target = Bun.argv[2] || "my-vorb-app";
@@ -23,6 +26,15 @@ console.log(
 console.log(gradient.vice("⚡ Blazing fast static site launcher"));
 console.log(chalk.magenta(`→ Creating your project in: ${chalk.bold(target)}\n`));
 
+// Prompt for TypeScript or JavaScript
+const rl = readline.createInterface({ input, output });
+let useTS = false;
+const lang = await rl.question(chalk.bold("Use TypeScript? [Y/n] "));
+if (lang.trim().toLowerCase() === "y" || lang.trim() === "") {
+  useTS = true;
+}
+console.log(); // spacing
+
 // Clone repo
 const cloneSpinner = ora("Cloning template...").start();
 try {
@@ -34,7 +46,7 @@ try {
   process.exit(1);
 }
 
-// Cleanup
+// Cleanup .git
 const cleanSpinner = ora("Cleaning up template...").start();
 try {
   await $`rm -rf ${target}/.git`;
@@ -45,6 +57,39 @@ try {
   process.exit(1);
 }
 
+// TypeScript conversion
+if (useTS) {
+  const tsSpinner = ora("Converting to TypeScript...").start();
+  try {
+    await $`mv ${target}/src/app.jsx ${target}/src/app.tsx`;
+    await $`mv ${target}/src/main.jsx ${target}/src/main.tsx`;
+    await $`touch ${target}/tsconfig.json`;
+
+    await writeFile(
+      `${target}/tsconfig.json`,
+      `{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src"]
+}
+`
+    );
+
+    await $`bun add -d typescript @types/react @types/react-dom`;
+    tsSpinner.succeed("🔷 TypeScript setup complete.");
+  } catch (e) {
+    tsSpinner.fail("❌ TypeScript conversion failed.");
+    console.error(e);
+    process.exit(1);
+  }
+}
+
 // Echo next steps
 console.log(chalk.greenBright("\n🚀 All set!"));
 console.log(gradient.vice("\nNext steps:"));
@@ -53,7 +98,6 @@ console.log(chalk.cyan(`  bun install`));
 console.log(chalk.cyan(`  bun run dev`));
 console.log(gradient.vice("\nOr press Y below to run these now."));
 
-const rl = readline.createInterface({ input, output });
 const answer = await rl.question(chalk.bold("\nRun setup now? [Y/n] "));
 rl.close();
 
