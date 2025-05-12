@@ -41,6 +41,7 @@ try {
 } catch (e) {
   cloneSpinner.fail("❌ Failed to clone the template.");
   console.error(e);
+  rl.close();
   process.exit(1);
 }
 
@@ -52,6 +53,7 @@ try {
 } catch (e) {
   cleanSpinner.fail("❌ Failed to clean up.");
   console.error(e);
+  rl.close();
   process.exit(1);
 }
 
@@ -65,7 +67,6 @@ if (useTS) {
     const vitePath = `${target}/vite.config.js`;
     const viteTSPath = `${target}/vite.config.ts`;
 
-    // Convert vite.config.js to vite.config.ts
     const viteContents = await readFile(vitePath, "utf-8");
     const viteTS = viteContents
       .replace(/\/\*\* @type \{import\("vite"\)\.UserConfig\} \*\//, "")
@@ -75,7 +76,6 @@ if (useTS) {
     await writeFile(viteTSPath, viteTS);
     await $`rm ${vitePath}`;
 
-    // tsconfig.json
     await writeFile(
       `${target}/tsconfig.json`,
       `{
@@ -100,6 +100,7 @@ if (useTS) {
   } catch (e) {
     tsSpinner.fail("❌ TypeScript conversion failed.");
     console.error(e);
+    rl.close();
     process.exit(1);
   }
 }
@@ -133,5 +134,5 @@ if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
   console.log(chalk.magenta(`  bun install`));
   console.log(chalk.magenta(`  bun run dev`));
   console.log(chalk.greenBright("\nHappy hacking!\n"));
-  process.exit(0); // ✅ fix: ensure clean exit
+  process.exit(0); // ✅ fixes final hang
 }
