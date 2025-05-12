@@ -5,14 +5,16 @@ import chalk from "chalk";
 import ora from "ora";
 import figlet from "figlet";
 import gradient from "gradient-string";
-import readline from "readline/promises";
-import { stdin as input, stdout as output } from "node:process";
 import { writeFile, readFile } from "fs/promises";
+
+// Use synchronous readline from Node.js
+import * as readline from 'readline';
+import { stdin, stdout, exit } from 'process';
 
 const TEMPLATE_REPO = "https://github.com/forresttindall/vorb.git";
 const target = Bun.argv[2] || "my-vorb-app";
 
-// Logo
+// Display logo
 console.log(
   gradient.pastel(
     figlet.textSync("Vorb", {
@@ -24,27 +26,30 @@ console.log(
 console.log(gradient.vice("⚡ Blazing fast static site launcher"));
 console.log(chalk.magenta(`→ Creating your project in: ${chalk.bold(target)}\n`));
 
-// Create readline interface
-const rl = readline.createInterface({ input, output });
+// Create a synchronous question helper
+function askQuestion(query) {
+  const rl = readline.createInterface({
+    input: stdin,
+    output: stdout,
+  });
 
-// Function to handle clean exit
-function exit(code = 0) {
-  rl.close();
-  process.exit(code);
+  return new Promise(resolve => {
+    rl.question(query, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
 }
 
-// Main function to run the CLI steps
-async function main() {
+// Main execution wrapped in an async IIFE
+(async () => {
   try {
-    // TypeScript prompt
-    let useTS = false;
-    const lang = await rl.question(chalk.bold("Use TypeScript? [Y/n] "));
-    if (lang.trim().toLowerCase() === "y" || lang.trim() === "") {
-      useTS = true;
-    }
+    // Ask about TypeScript
+    const lang = await askQuestion(chalk.bold("Use TypeScript? [Y/n] "));
+    const useTS = lang.trim().toLowerCase() === "y" || lang.trim() === "";
     console.log(); // spacing
 
-    // Clone
+    // Clone the repo
     const cloneSpinner = ora("Cloning template...").start();
     try {
       await $`git clone ${TEMPLATE_REPO} ${target}`;
@@ -55,7 +60,7 @@ async function main() {
       exit(1);
     }
 
-    // Remove .git
+    // Clean up git
     const cleanSpinner = ora("Cleaning up template...").start();
     try {
       await $`rm -rf ${target}/.git`;
@@ -66,7 +71,7 @@ async function main() {
       exit(1);
     }
 
-    // Convert to TypeScript
+    // Convert to TypeScript if requested
     if (useTS) {
       const tsSpinner = ora("Converting to TypeScript...").start();
       try {
@@ -113,7 +118,7 @@ async function main() {
       }
     }
 
-    // Prompt to install
+    // Display next steps
     console.log(chalk.greenBright("\n🚀 All set!"));
     console.log(gradient.vice("\nNext steps:"));
     console.log(chalk.cyan(`  cd ${target}`));
@@ -121,9 +126,11 @@ async function main() {
     console.log(chalk.cyan(`  bun run dev`));
     console.log(gradient.vice("\nOr press Y below to run these now."));
 
-    const answer = await rl.question(chalk.bold("\nRun setup now? [Y/n] "));
-
+    // Ask about running setup
+    const answer = await askQuestion(chalk.bold("\nRun setup now? [Y/n] "));
+    
     if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
+      // User wants to run setup
       const runSpinner = ora("Setting up project...").start();
       try {
         process.chdir(target);
@@ -131,7 +138,6 @@ async function main() {
         runSpinner.succeed("📦 Dependencies installed.");
         console.log(chalk.greenBright("\nStarting development server..."));
         console.log(chalk.gray("(Press Ctrl+C to stop)"));
-        // Don't exit after this - let the dev server run
         await $`bun run dev`;
       } catch (e) {
         runSpinner.fail("❌ Setup failed.");
@@ -139,26 +145,21 @@ async function main() {
         exit(1);
       }
     } else {
-      // If user chooses not to run setup
+      // User doesn't want to run setup
       console.log(chalk.greenBright("\n👍 You can run these later:"));
       console.log(chalk.magenta(`  cd ${target}`));
       console.log(chalk.magenta(`  bun install`));
       console.log(chalk.magenta(`  bun run dev`));
       console.log(chalk.greenBright("\nHappy hacking!"));
       
-      // Close readline and exit explicitly
-      exit(0);
+      // Force exit with a deliberate console message
+      console.log(chalk.gray("\nExiting process..."));
+      
+      // Kill the process forcefully
+      process.kill(process.pid, 'SIGTERM');
     }
   } catch (error) {
     console.error(chalk.red("An unexpected error occurred:"), error);
     exit(1);
   }
-}
-
-// Run the main function
-try {
-  await main();
-} catch (error) {
-  console.error(chalk.red("Fatal error:"), error);
-  exit(1);
-}
+})();
