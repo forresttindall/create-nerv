@@ -17,8 +17,6 @@ console.log(
   gradient.pastel(
     figlet.textSync("Vorb", {
       font: "Slant",
-      horizontalLayout: "default",
-      verticalLayout: "default",
     })
   )
 );
@@ -72,7 +70,8 @@ if (useTS) {
     const viteTS = viteContents
       .replace(/\/\*\* @type \{import\("vite"\)\.UserConfig\} \*\//, "")
       .replace("export default", "const config =")
-      .replace(/$/, "\nexport default config;\n");
+      .concat("\nexport default config;\n");
+
     await writeFile(viteTSPath, viteTS);
     await $`rm ${vitePath}`;
 
@@ -97,7 +96,7 @@ if (useTS) {
 `
     );
 
-    tsSpinner.succeed("🔷 TypeScript files prepared. Dependencies will be installed after confirmation.");
+    tsSpinner.succeed("🔷 TypeScript files prepared.");
   } catch (e) {
     tsSpinner.fail("❌ TypeScript conversion failed.");
     console.error(e);
@@ -133,5 +132,6 @@ if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
   console.log(chalk.magenta(`  cd ${target}`));
   console.log(chalk.magenta(`  bun install`));
   console.log(chalk.magenta(`  bun run dev`));
-  console.log(chalk.greenBright("\nHappy hacking!"));
+  console.log(chalk.greenBright("\nHappy hacking!\n"));
+  process.exit(0); // ✅ fix: ensure clean exit
 }
