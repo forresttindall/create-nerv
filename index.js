@@ -9,62 +9,60 @@ import readline from "readline/promises";
 import { stdin as input, stdout as output } from "node:process";
 import { writeFile } from "fs/promises";
 
+// reusable prompt function
+const prompt = async (question: string) => {
+  const rl = readline.createInterface({ input, output });
+  const answer = await rl.question(question);
+  rl.close();
+  return answer.trim().toLowerCase();
+};
+
 const TEMPLATE_REPO = "https://github.com/forresttindall/vorb.git";
 const target = Bun.argv[2] || "my-vorb-app";
 
-// Logo header
+// ASCII title
 console.log(
   gradient.pastel(
-    figlet.textSync("Vorb", {
-      font: "Slant",
-      horizontalLayout: "default",
-      verticalLayout: "default",
-    })
+    figlet.textSync("Vorb", { font: "Slant" })
   )
 );
 
 console.log(gradient.vice("⚡ Blazing fast static site launcher"));
 console.log(chalk.magenta(`→ Creating your project in: ${chalk.bold(target)}\n`));
 
-// Prompt for TypeScript or JavaScript
-const rl = readline.createInterface({ input, output });
-let useTS = false;
-const lang = await rl.question(chalk.bold("Use TypeScript? [Y/n] "));
-if (lang.trim().toLowerCase() === "y" || lang.trim() === "") {
-  useTS = true;
-}
-console.log(); // spacing
+// Ask for TypeScript preference
+const useTS = await prompt(chalk.bold("Use TypeScript? [Y/n] ")) !== "n";
 
-// Clone repo
+// Clone template repo
 const cloneSpinner = ora("Cloning template...").start();
 try {
   await $`git clone ${TEMPLATE_REPO} ${target}`;
   cloneSpinner.succeed("✅ Template cloned.");
-} catch (e) {
+} catch (err) {
   cloneSpinner.fail("❌ Failed to clone the template.");
-  console.error(e);
+  console.error(err);
   process.exit(1);
 }
 
-// Cleanup .git
+// Remove .git
 const cleanSpinner = ora("Cleaning up template...").start();
 try {
   await $`rm -rf ${target}/.git`;
   cleanSpinner.succeed("🧼 Cleanup complete.");
-} catch (e) {
+} catch (err) {
   cleanSpinner.fail("❌ Failed to clean up.");
-  console.error(e);
+  console.error(err);
   process.exit(1);
 }
 
-// TypeScript conversion
+// Convert to TypeScript if requested
 if (useTS) {
   const tsSpinner = ora("Converting to TypeScript...").start();
   try {
     await $`mv ${target}/src/app.jsx ${target}/src/app.tsx`;
     await $`mv ${target}/src/main.jsx ${target}/src/main.tsx`;
-    await $`touch ${target}/tsconfig.json`;
 
+    // Create tsconfig.json
     await writeFile(
       `${target}/tsconfig.json`,
       `{
@@ -85,30 +83,30 @@ if (useTS) {
 `
     );
 
-    // Convert Vite config to TypeScript
-    await $`mv ${target}/vite.config.js ${target}/vite.config.ts`;
-    const viteConfigTS = `
-import { defineConfig } from 'vite';
+    // Replace vite.config.js with vite.config.ts
+    await $`rm ${target}/vite.config.js`;
+    await writeFile(
+      `${target}/vite.config.ts`,
+      `import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-});
-`;
-    await writeFile(`${target}/vite.config.ts`, viteConfigTS.trimStart());
+});\n`
+    );
 
+    // Install types
     await $`bun add -d typescript @types/react @types/react-dom`;
 
     tsSpinner.succeed("🔷 TypeScript setup complete.");
-  } catch (e) {
+  } catch (err) {
     tsSpinner.fail("❌ TypeScript conversion failed.");
-    console.error(e);
+    console.error(err);
     process.exit(1);
   }
 }
 
-// Echo next steps
+// Show next steps
 console.log(chalk.greenBright("\n🚀 All set!"));
 console.log(gradient.vice("\nNext steps:"));
 console.log(chalk.cyan(`  cd ${target}`));
@@ -116,19 +114,17 @@ console.log(chalk.cyan(`  bun install`));
 console.log(chalk.cyan(`  bun run dev`));
 console.log(gradient.vice("\nOr press Y below to run these now."));
 
-const answer = await rl.question(chalk.bold("\nRun setup now? [Y/n] "));
-rl.close();
-
-if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
+const runNow = await prompt(chalk.bold("\nRun setup now? [Y/n] "));
+if (runNow === "y" || runNow === "") {
   const runSpinner = ora("Setting up project...").start();
   try {
     process.chdir(target);
     await $`bun install`;
     runSpinner.succeed("📦 Dependencies installed.");
     await $`bun run dev`;
-  } catch (e) {
+  } catch (err) {
     runSpinner.fail("❌ Setup failed.");
-    console.error(e);
+    console.error(err);
     process.exit(1);
   }
 } else {
