@@ -114,7 +114,7 @@ console.log(chalk.cyan(`  bun run dev`));
 console.log(gradient.vice("\nOr press Y below to run these now."));
 
 const answer = await rl.question(chalk.bold("\nRun setup now? [Y/n] "));
-rl.close(); // Ensure readline closes before exiting.
+rl.close(); // Close readline interface
 
 if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
   const runSpinner = ora("Setting up project...").start();
@@ -122,6 +122,8 @@ if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
     process.chdir(target);
     await $`bun install`;
     runSpinner.succeed("📦 Dependencies installed.");
+    console.log(chalk.greenBright("\nStarting development server..."));
+    console.log(chalk.gray("(Press Ctrl+C to stop)"));
     await $`bun run dev`;
   } catch (e) {
     runSpinner.fail("❌ Setup failed.");
@@ -134,7 +136,7 @@ if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
   console.log(chalk.magenta(`  bun install`));
   console.log(chalk.magenta(`  bun run dev`));
   console.log(chalk.greenBright("\nHappy hacking!"));
-
-  // Explicitly exit the process to avoid hanging
-  process.exit(0); // ✅ explicitly exit
+  
+  // Make sure we exit explicitly
+  process.exit(0);
 }
