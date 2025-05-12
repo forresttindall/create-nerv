@@ -114,7 +114,7 @@ console.log(chalk.cyan(`  bun run dev`));
 console.log(gradient.vice("\nOr press Y below to run these now."));
 
 const answer = await rl.question(chalk.bold("\nRun setup now? [Y/n] "));
-rl.close();
+rl.close(); // Ensure readline closes before exiting.
 
 if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
   const runSpinner = ora("Setting up project...").start();
@@ -133,6 +133,8 @@ if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
   console.log(chalk.magenta(`  cd ${target}`));
   console.log(chalk.magenta(`  bun install`));
   console.log(chalk.magenta(`  bun run dev`));
-  console.log(chalk.greenBright("\nHappy hacking!\n"));
-  process.exit(0); // ✅ fixes final hang
+  console.log(chalk.greenBright("\nHappy hacking!"));
+
+  // Explicitly exit the process to avoid hanging
+  process.exit(0); // ✅ explicitly exit
 }
