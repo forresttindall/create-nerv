@@ -85,7 +85,21 @@ if (useTS) {
 `
     );
 
+    // Convert Vite config to TypeScript
+    await $`mv ${target}/vite.config.js ${target}/vite.config.ts`;
+    const viteConfigTS = `
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+});
+`;
+    await writeFile(`${target}/vite.config.ts`, viteConfigTS.trimStart());
+
     await $`bun add -d typescript @types/react @types/react-dom`;
+
     tsSpinner.succeed("🔷 TypeScript setup complete.");
   } catch (e) {
     tsSpinner.fail("❌ TypeScript conversion failed.");
