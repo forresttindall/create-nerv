@@ -1,25 +1,12 @@
 {
-    "name": "create-vorb",
-    "version": "0.1.0",
-    "description": "A blazing fast, retro-styled static site launcher using Bun + React + Vite",
+    "name": "create-nerv",
+    "version": "1.0.0",
     "bin": {
-        "create-zap": "./index.js"
+      "create-nerv": "./src/index.js"
     },
-    "keywords": [
-        "bun",
-        "cli",
-        "vite",
-        "react",
-        "zap",
-        "starter",
-        "template"
-    ],
-    "author": "Forrest Tindall",
-    "license": "MIT",
-    "dependencies": {
-        "chalk": "^5.4.1",
-        "figlet": "^1.8.1",
-        "gradient-string": "^3.0.0",
-        "ora": "^8.2.0"
+    "type": "module",
+    "scripts": {
+      "dev": "node src/index.js",
+      "start": "node src/index.js"
     }
-}
+  }
