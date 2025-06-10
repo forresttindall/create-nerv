@@ -10485,22 +10485,20 @@ function ora(options) {
 }
 
 // src/index.js
-var import_figlet = __toESM(require_node_figlet(), 1);
-var import_gradient_string = __toESM(require_gradient_string(), 1);
+var import_figlet = __toESM(require_node_figlet());
+var import_gradient_string = __toESM(require_gradient_string());
 var import_promises = require("fs/promises");
 var import_fs = require("fs");
-var readline2 = __toESM(require("readline"), 1);
+var readline2 = __toESM(require("readline"));
 var import_process = require("process");
 var execAsync = (0, import_util.promisify)(import_child_process.exec);
 var TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 var target = process.argv[2] || "my-nerv-app";
-console.log(
-  import_gradient_string.default.pastel(
-    import_figlet.default.textSync("NERV", {
-      font: "Slant"
-    })
-  )
-);
+console.log(import_figlet.default.textSync("NERV", {
+  font: "Big",
+  horizontalLayout: "default",
+  verticalLayout: "default"
+}));
 console.log(import_gradient_string.default.vice("\u26A1 Full stack serverless site launcher"));
 console.log(source_default.gray("Created by Creationbase.io"));
 console.log(source_default.magenta(`\u2192 Creating your project in: ${source_default.bold(target)}

@@ -14,13 +14,12 @@ const execAsync = promisify(exec);
 const TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 const target = process.argv[2] || "my-nerv-app";
 
-console.log(
-  gradient.pastel(
-    figlet.textSync("NERV", {
-      font: "Slant",
-    })
-  )
-);
+
+console.log(figlet.textSync('NERV', {
+  font: 'Big', 
+  horizontalLayout: 'default',
+  verticalLayout: 'default'
+}));
 
 console.log(gradient.vice("⚡ Full stack serverless site launcher"));
 console.log(chalk.gray("Created by Creationbase.io"));
