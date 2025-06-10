@@ -1,12 +1,18 @@
 {
-    "name": "create-nerv",
-    "version": "1.0.0",
-    "bin": {
-      "create-nerv": "./src/index.js"
-    },
-    "type": "module",
-    "scripts": {
-      "dev": "node src/index.js",
-      "start": "node src/index.js"
-    }
+  "name": "create-nerv",
+  "version": "1.0.1",
+  "type": "module",
+  "bin": {
+    "create-nerv": "./index.ts"
+  },
+  "dependencies": {
+    "chalk": "^5.0.0",
+    "ora": "^6.0.0",
+    "figlet": "^1.5.0",
+    "gradient-string": "^2.0.0"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
   }
+}
