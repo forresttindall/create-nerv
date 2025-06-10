@@ -14,6 +14,8 @@
 
 ## About NERV Stack
 
+### Use npm create-nerv your-app
+
 The **NERV Stack** is a robust and efficient boilerplate designed for building modern, scalable web applications with a focus on speed and serverless deployment. It combines popular and powerful technologies to provide a seamless development experience from frontend to backend.
 
 **Purpose:**
