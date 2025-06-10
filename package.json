@@ -3,16 +3,16 @@
     "version": "0.1.0",
     "description": "A blazing fast, retro-styled static site launcher using Bun + React + Vite",
     "bin": {
-      "create-zap": "./index.js"
+        "create-zap": "./index.js"
     },
     "keywords": [
-      "bun",
-      "cli",
-      "vite",
-      "react",
-      "zap",
-      "starter",
-      "template"
+        "bun",
+        "cli",
+        "vite",
+        "react",
+        "zap",
+        "starter",
+        "template"
     ],
     "author": "Forrest Tindall",
     "license": "MIT",
@@ -22,4 +22,4 @@
         "gradient-string": "^3.0.0",
         "ora": "^8.2.0"
     }
-  }
+}

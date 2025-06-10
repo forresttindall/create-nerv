@@ -1,32 +1,32 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 
-import { $ } from "bun";
+import { spawn, exec } from "child_process";
+import { promisify } from "util";
 import chalk from "chalk";
 import ora from "ora";
 import figlet from "figlet";
 import gradient from "gradient-string";
-import { writeFile, readFile } from "fs/promises";
-
-// Use synchronous readline from Node.js
+import { writeFile, readFile, access } from "fs/promises";
+import { constants } from "fs";
 import * as readline from 'readline';
 import { stdin, stdout, exit } from 'process';
 
-const TEMPLATE_REPO = "https://github.com/forresttindall/vorb.git";
-const target = Bun.argv[2] || "my-vorb-app";
+const execAsync = promisify(exec);
+const TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
+const target = process.argv[2] || "my-nerv-app";
 
-// Display logo
 console.log(
   gradient.pastel(
-    figlet.textSync("Vorb", {
+    figlet.textSync("NERV", {
       font: "Slant",
     })
   )
 );
 
-console.log(gradient.vice("⚡ Blazing fast static site launcher"));
+console.log(gradient.vice("⚡ Full stack serverless site launcher"));
+console.log(chalk.gray("Created by Creationbase.io"));
 console.log(chalk.magenta(`→ Creating your project in: ${chalk.bold(target)}\n`));
 
-// Create a synchronous question helper
 function askQuestion(query) {
   const rl = readline.createInterface({
     input: stdin,
@@ -41,54 +41,163 @@ function askQuestion(query) {
   });
 }
 
-// Main execution wrapped in an async IIFE
+// Helper function to check if a file exists
+async function fileExists(path) {
+  try {
+    await access(path, constants.F_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Helper function to run shell commands
+async function runCommand(command, options = {}) {
+  return new Promise((resolve, reject) => {
+    const [cmd, ...args] = command.split(' ');
+    const child = spawn(cmd, args, {
+      stdio: options.quiet ? 'pipe' : 'inherit',
+      shell: true,
+      ...options
+    });
+
+    let stdout = '';
+    let stderr = '';
+
+    if (options.quiet) {
+      child.stdout?.on('data', (data) => {
+        stdout += data.toString();
+      });
+      child.stderr?.on('data', (data) => {
+        stderr += data.toString();
+      });
+    }
+
+    child.on('close', (code) => {
+      if (code === 0) {
+        resolve({ stdout, stderr });
+      } else {
+        reject(new Error(`Command failed with exit code ${code}: ${stderr || stdout}`));
+      }
+    });
+
+    child.on('error', (error) => {
+      reject(error);
+    });
+  });
+}
+
 (async () => {
   try {
-    // Ask about TypeScript
+    // Check if git is available
+    try {
+      await runCommand('git --version', { quiet: true });
+    } catch (e) {
+      console.error(chalk.red("❌ Git is required but not found. Please install Git and try again."));
+      exit(1);
+    }
+
+    // Check if npm is available
+    try {
+      await runCommand('npm --version', { quiet: true });
+    } catch (e) {
+      console.error(chalk.red("❌ npm is required but not found. Please install Node.js and npm."));
+      exit(1);
+    }
+
+    // Check if target directory already exists
+    if (await fileExists(target)) {
+      console.error(chalk.red(`❌ Directory '${target}' already exists. Please choose a different name or remove the existing directory.`));
+      exit(1);
+    }
+
     const lang = await askQuestion(chalk.bold("Use TypeScript? [Y/n] "));
     const useTS = lang.trim().toLowerCase() === "y" || lang.trim() === "";
     console.log(); // spacing
 
-    // Clone the repo
     const cloneSpinner = ora("Cloning template...").start();
     try {
-      await $`git clone ${TEMPLATE_REPO} ${target}`;
+      await runCommand(`git clone ${TEMPLATE_REPO} ${target}`, { quiet: true });
       cloneSpinner.succeed("✅ Template cloned.");
     } catch (e) {
       cloneSpinner.fail("❌ Failed to clone the template.");
-      console.error(e);
+      console.error(chalk.red("Error details:"), e.message);
       exit(1);
     }
 
-    // Clean up git
     const cleanSpinner = ora("Cleaning up template...").start();
     try {
-      await $`rm -rf ${target}/.git`;
+      // Cross-platform way to remove .git directory
+      if (process.platform === 'win32') {
+        await runCommand(`rmdir /s /q "${target}\\.git"`, { quiet: true });
+      } else {
+        await runCommand(`rm -rf "${target}/.git"`, { quiet: true });
+      }
       cleanSpinner.succeed("🧼 Cleanup complete.");
     } catch (e) {
       cleanSpinner.fail("❌ Failed to clean up.");
-      console.error(e);
+      console.error(chalk.red("Error details:"), e.message);
       exit(1);
     }
 
-    // Convert to TypeScript if requested
     if (useTS) {
       const tsSpinner = ora("Converting to TypeScript...").start();
       try {
-        await $`mv ${target}/src/app.jsx ${target}/src/app.tsx`;
-        await $`mv ${target}/src/main.jsx ${target}/src/main.tsx`;
+        // Check if source files exist before moving them
+        const appJsxPath = `${target}/src/app.jsx`;
+        const mainJsxPath = `${target}/src/main.jsx`;
+        
+        if (await fileExists(appJsxPath)) {
+          if (process.platform === 'win32') {
+            await runCommand(`move "${appJsxPath}" "${target}/src/app.tsx"`, { quiet: true });
+          } else {
+            await runCommand(`mv "${appJsxPath}" "${target}/src/app.tsx"`, { quiet: true });
+          }
+        }
+        
+        if (await fileExists(mainJsxPath)) {
+          if (process.platform === 'win32') {
+            await runCommand(`move "${mainJsxPath}" "${target}/src/main.tsx"`, { quiet: true });
+          } else {
+            await runCommand(`mv "${mainJsxPath}" "${target}/src/main.tsx"`, { quiet: true });
+          }
+        }
 
         const vitePath = `${target}/vite.config.js`;
         const viteTSPath = `${target}/vite.config.ts`;
 
-        const viteContents = await readFile(vitePath, "utf-8");
-        const viteTS = viteContents
-          .replace(/\/\*\* @type \{import\("vite"\)\.UserConfig\} \*\//, "")
-          .replace("export default", "const config =")
-          .concat("\nexport default config;\n");
+        if (await fileExists(vitePath)) {
+          const viteContents = await readFile(vitePath, "utf-8");
+          const viteTS = viteContents
+            .replace(/\/\*\* @type \{import\("vite"\)\.UserConfig\} \*\//, "")
+            .replace("export default", "const config =")
+            .concat("\nexport default config;\n");
 
-        await writeFile(viteTSPath, viteTS);
-        await $`rm ${vitePath}`;
+          await writeFile(viteTSPath, viteTS);
+          
+          // Cross-platform file deletion
+          if (process.platform === 'win32') {
+            await runCommand(`del "${vitePath}"`, { quiet: true });
+          } else {
+            await runCommand(`rm "${vitePath}"`, { quiet: true });
+          }
+        }
+
+        // Update package.json to include TypeScript dependencies
+        const packageJsonPath = `${target}/package.json`;
+        if (await fileExists(packageJsonPath)) {
+          const packageJson = JSON.parse(await readFile(packageJsonPath, "utf-8"));
+          
+          // Add TypeScript dev dependencies
+          packageJson.devDependencies = {
+            ...packageJson.devDependencies,
+            "typescript": "^5.0.0",
+            "@types/react": "^18.0.0",
+            "@types/react-dom": "^18.0.0"
+          };
+          
+          await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
+        }
 
         await writeFile(
           `${target}/tsconfig.json`,
@@ -113,53 +222,48 @@ function askQuestion(query) {
         tsSpinner.succeed("🔷 TypeScript files prepared.");
       } catch (e) {
         tsSpinner.fail("❌ TypeScript conversion failed.");
-        console.error(e);
+        console.error(chalk.red("Error details:"), e.message);
         exit(1);
       }
     }
 
-    // Display next steps
     console.log(chalk.greenBright("\n🚀 All set!"));
     console.log(gradient.vice("\nNext steps:"));
     console.log(chalk.cyan(`  cd ${target}`));
-    console.log(chalk.cyan(`  bun install`));
-    console.log(chalk.cyan(`  bun run dev`));
+    console.log(chalk.cyan(`  npm install`));
+    console.log(chalk.cyan(`  npm run dev`));
     console.log(gradient.vice("\nOr press Y below to run these now."));
 
-    // Ask about running setup
     const answer = await askQuestion(chalk.bold("\nRun setup now? [Y/n] "));
     
     if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
-      // User wants to run setup
-      const runSpinner = ora("Setting up project...").start();
+      const runSpinner = ora("Installing dependencies...").start();
       try {
         process.chdir(target);
-        await $`bun install`;
+        await runCommand('npm install');
         runSpinner.succeed("📦 Dependencies installed.");
         console.log(chalk.greenBright("\nStarting development server..."));
         console.log(chalk.gray("(Press Ctrl+C to stop)"));
-        await $`bun run dev`;
+        
+        // Run dev server without capturing output so user can see it
+        await runCommand('npm run dev');
       } catch (e) {
         runSpinner.fail("❌ Setup failed.");
-        console.error(e);
+        console.error(chalk.red("Error details:"), e.message);
         exit(1);
       }
     } else {
-      // User doesn't want to run setup
       console.log(chalk.greenBright("\n👍 You can run these later:"));
       console.log(chalk.magenta(`  cd ${target}`));
-      console.log(chalk.magenta(`  bun install`));
-      console.log(chalk.magenta(`  bun run dev`));
+      console.log(chalk.magenta(`  npm install`));
+      console.log(chalk.magenta(`  npm run dev`));
       console.log(chalk.greenBright("\nHappy hacking!"));
       
-      // Force exit with a deliberate console message
-      console.log(chalk.gray("\nExiting process..."));
-      
-      // Kill the process forcefully
-      process.kill(process.pid, 'SIGTERM');
+      // Clean exit
+      exit(0);
     }
   } catch (error) {
-    console.error(chalk.red("An unexpected error occurred:"), error);
+    console.error(chalk.red("An unexpected error occurred:"), error.message || error);
     exit(1);
   }
 })();
