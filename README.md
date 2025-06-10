@@ -1,12 +1,14 @@
-# NERV Stack
+<h1 align="center"> NERV Stack </h1>
 
 <p align="center">
-  <img src="public/images/dot-triangle.png" alt="NERV Stack Logo" width="100"/>
+  <img src="https://github.com/user-attachments/assets/9464965d-6a68-48f6-88db-4448157a2d2e" alt="NERV Stack Logo" width="100px" />
 </p>
 
 <p align="center">
   A fast, fullstack, and serverless solution for modern web applications.
 </p>
+
+---
 
 ---
 
@@ -41,20 +43,9 @@ Ensure you have the following installed on your machine:
 * **npm** (version 8.0.0 or higher)
 
 ### Installation
-
-1.  **Clone the repository:**
-    ```bash
-    git clone [https://github.com/forresttindall/nerv.git](https://github.com/forresttindall/nerv.git) 
-    cd nerv
-    ```
-
-2.  **Install dependencies:**
-    Navigate to the project root and install all necessary packages for both the frontend and backend:
-    ```bash
-    npm install
-    ```
-
-### Running the Application
+```
+npm create-nerv your-app
+```
 
 ### Development Mode
 
@@ -68,12 +59,7 @@ To build the application for production:
 ```bash
 npm run build
 ```
-### Running the Backend
-Navigate to the backend directory and start the Express.js server:
-```bash
-cd backend
-npm start
-```
+
 
 ### Project Structure
 ```
@@ -88,7 +74,9 @@ nerv/
 │   ├── index.css               # Global styles (Supabase dark minimalist theme)
 │   └── main.jsx                # React entry point
 ├── api/                        # Serverless API routes (for Express backend)
-│   └── status.js               # Example API endpoint
+│   ├── contact.js              # API endpoint for contact forms/data
+│   ├── data.js                 # API endpoint for general data operations
+│   └── status.js               # API endpoint for application status checks
 ├── .gitignore                  # Specifies untracked files to ignore
 ├── index.html                  # Main HTML file
 ├── package.json                # Project dependencies and scripts
