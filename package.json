@@ -1,6 +1,6 @@
 {
   "name": "create-nerv",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "Create a new Nerv.js application",
   "main": "dist/index.js",
   "bin": {
@@ -8,13 +8,17 @@
   },
   "files": [
     "dist/**/*",
-    
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "esbuild src/index.js --bundle --outfile=dist/index.js --platform=node --format=cjs",
+    "build": "esbuild src/index.js --bundle --outfile=dist/index.js --platform=node --format=cjs --external:chalk --external:ora --external:gradient-string",
     "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "ora": "^5.4.1",
+    "gradient-string": "^2.0.2"
   },
   "keywords": [
     "nerv",
