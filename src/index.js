@@ -5,7 +5,7 @@ const { spawn, exec } = require("child_process");
 const { promisify } = require("util");
 const chalk = require("chalk");
 const ora = require("ora");
-const figlet = require("figlet");
+// REMOVED: const figlet = require("figlet");
 const gradient = require("gradient-string");
 const { writeFile, readFile, access } = require("fs/promises");
 const { constants } = require("fs");
@@ -16,8 +16,17 @@ const execAsync = promisify(exec);
 const TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 const target = process.argv[2] || "my-nerv-app";
 
-
-console.log(figlet.textSync('NERV'));
+console.log(`
+  ███▄    █ ▓█████  ██▀███   ██▒   █▓
+  ██ ▀█   █ ▓█   ▀ ▓██ ▒ ██▒▓██░   █▒
+ ▓██  ▀█ ██▒▒███   ▓██ ░▄█ ▒ ▓██  █▒░
+ ▓██▒  ▐▌██▒▒▓█  ▄ ▒██▀▀█▄    ▒██ █░░
+ ▒██░   ▓██░░▒████▒░██▓ ▒██▒   ▒▀█░  
+ ░ ▒░   ▒ ▒ ░░ ▒░ ░░ ▒▓ ░▒▓░   ░ ▐░  
+ ░ ░░   ░ ▒░ ░ ░  ░  ░▒ ░ ▒░   ░ ░░  
+    ░   ░ ░    ░     ░░   ░      ░░  
+          ░    ░  ░   ░           ░  
+ `);
  
 
 console.log(gradient.vice("⚡ Full stack serverless site launcher"));
