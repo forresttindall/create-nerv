@@ -16,12 +16,8 @@ const execAsync = promisify(exec);
 const TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 const target = process.argv[2] || "my-nerv-app";
 
-// Use figlet's built-in Big font instead of external file
-console.log(figlet.textSync('NERV', {
-  font: 'Big', 
-  horizontalLayout: 'default',
-  verticalLayout: 'default'
-}));
+
+console.log(figlet.textSync('NERV'));
 
 console.log(gradient.vice("⚡ Full stack serverless site launcher"));
 console.log(chalk.gray("Created by Creationbase.io"));

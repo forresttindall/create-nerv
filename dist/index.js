@@ -5,8 +5,15 @@ var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
 var __getOwnPropNames = Object.getOwnPropertyNames;
 var __getProtoOf = Object.getPrototypeOf;
 var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+};
+var __export = (target2, all) => {
+  for (var name in all)
+    __defProp(target2, name, { get: all[name], enumerable: true });
 };
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
@@ -24,6 +31,539 @@ var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__
   isNodeMode || !mod || !mod.__esModule ? __defProp(target2, "default", { value: mod, enumerable: true }) : target2,
   mod
 ));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
+// node_modules/chalk/source/vendor/ansi-styles/index.js
+function assembleStyles() {
+  const codes = /* @__PURE__ */ new Map();
+  for (const [groupName, group] of Object.entries(styles)) {
+    for (const [styleName, style] of Object.entries(group)) {
+      styles[styleName] = {
+        open: `\x1B[${style[0]}m`,
+        close: `\x1B[${style[1]}m`
+      };
+      group[styleName] = styles[styleName];
+      codes.set(style[0], style[1]);
+    }
+    Object.defineProperty(styles, groupName, {
+      value: group,
+      enumerable: false
+    });
+  }
+  Object.defineProperty(styles, "codes", {
+    value: codes,
+    enumerable: false
+  });
+  styles.color.close = "\x1B[39m";
+  styles.bgColor.close = "\x1B[49m";
+  styles.color.ansi = wrapAnsi16();
+  styles.color.ansi256 = wrapAnsi256();
+  styles.color.ansi16m = wrapAnsi16m();
+  styles.bgColor.ansi = wrapAnsi16(ANSI_BACKGROUND_OFFSET);
+  styles.bgColor.ansi256 = wrapAnsi256(ANSI_BACKGROUND_OFFSET);
+  styles.bgColor.ansi16m = wrapAnsi16m(ANSI_BACKGROUND_OFFSET);
+  Object.defineProperties(styles, {
+    rgbToAnsi256: {
+      value(red, green, blue) {
+        if (red === green && green === blue) {
+          if (red < 8) {
+            return 16;
+          }
+          if (red > 248) {
+            return 231;
+          }
+          return Math.round((red - 8) / 247 * 24) + 232;
+        }
+        return 16 + 36 * Math.round(red / 255 * 5) + 6 * Math.round(green / 255 * 5) + Math.round(blue / 255 * 5);
+      },
+      enumerable: false
+    },
+    hexToRgb: {
+      value(hex) {
+        const matches = /[a-f\d]{6}|[a-f\d]{3}/i.exec(hex.toString(16));
+        if (!matches) {
+          return [0, 0, 0];
+        }
+        let [colorString] = matches;
+        if (colorString.length === 3) {
+          colorString = [...colorString].map((character) => character + character).join("");
+        }
+        const integer = Number.parseInt(colorString, 16);
+        return [
+          /* eslint-disable no-bitwise */
+          integer >> 16 & 255,
+          integer >> 8 & 255,
+          integer & 255
+          /* eslint-enable no-bitwise */
+        ];
+      },
+      enumerable: false
+    },
+    hexToAnsi256: {
+      value: (hex) => styles.rgbToAnsi256(...styles.hexToRgb(hex)),
+      enumerable: false
+    },
+    ansi256ToAnsi: {
+      value(code) {
+        if (code < 8) {
+          return 30 + code;
+        }
+        if (code < 16) {
+          return 90 + (code - 8);
+        }
+        let red;
+        let green;
+        let blue;
+        if (code >= 232) {
+          red = ((code - 232) * 10 + 8) / 255;
+          green = red;
+          blue = red;
+        } else {
+          code -= 16;
+          const remainder = code % 36;
+          red = Math.floor(code / 36) / 5;
+          green = Math.floor(remainder / 6) / 5;
+          blue = remainder % 6 / 5;
+        }
+        const value = Math.max(red, green, blue) * 2;
+        if (value === 0) {
+          return 30;
+        }
+        let result = 30 + (Math.round(blue) << 2 | Math.round(green) << 1 | Math.round(red));
+        if (value === 2) {
+          result += 60;
+        }
+        return result;
+      },
+      enumerable: false
+    },
+    rgbToAnsi: {
+      value: (red, green, blue) => styles.ansi256ToAnsi(styles.rgbToAnsi256(red, green, blue)),
+      enumerable: false
+    },
+    hexToAnsi: {
+      value: (hex) => styles.ansi256ToAnsi(styles.hexToAnsi256(hex)),
+      enumerable: false
+    }
+  });
+  return styles;
+}
+var ANSI_BACKGROUND_OFFSET, wrapAnsi16, wrapAnsi256, wrapAnsi16m, styles, modifierNames, foregroundColorNames, backgroundColorNames, colorNames, ansiStyles, ansi_styles_default;
+var init_ansi_styles = __esm({
+  "node_modules/chalk/source/vendor/ansi-styles/index.js"() {
+    ANSI_BACKGROUND_OFFSET = 10;
+    wrapAnsi16 = (offset = 0) => (code) => `\x1B[${code + offset}m`;
+    wrapAnsi256 = (offset = 0) => (code) => `\x1B[${38 + offset};5;${code}m`;
+    wrapAnsi16m = (offset = 0) => (red, green, blue) => `\x1B[${38 + offset};2;${red};${green};${blue}m`;
+    styles = {
+      modifier: {
+        reset: [0, 0],
+        // 21 isn't widely supported and 22 does the same thing
+        bold: [1, 22],
+        dim: [2, 22],
+        italic: [3, 23],
+        underline: [4, 24],
+        overline: [53, 55],
+        inverse: [7, 27],
+        hidden: [8, 28],
+        strikethrough: [9, 29]
+      },
+      color: {
+        black: [30, 39],
+        red: [31, 39],
+        green: [32, 39],
+        yellow: [33, 39],
+        blue: [34, 39],
+        magenta: [35, 39],
+        cyan: [36, 39],
+        white: [37, 39],
+        // Bright color
+        blackBright: [90, 39],
+        gray: [90, 39],
+        // Alias of `blackBright`
+        grey: [90, 39],
+        // Alias of `blackBright`
+        redBright: [91, 39],
+        greenBright: [92, 39],
+        yellowBright: [93, 39],
+        blueBright: [94, 39],
+        magentaBright: [95, 39],
+        cyanBright: [96, 39],
+        whiteBright: [97, 39]
+      },
+      bgColor: {
+        bgBlack: [40, 49],
+        bgRed: [41, 49],
+        bgGreen: [42, 49],
+        bgYellow: [43, 49],
+        bgBlue: [44, 49],
+        bgMagenta: [45, 49],
+        bgCyan: [46, 49],
+        bgWhite: [47, 49],
+        // Bright color
+        bgBlackBright: [100, 49],
+        bgGray: [100, 49],
+        // Alias of `bgBlackBright`
+        bgGrey: [100, 49],
+        // Alias of `bgBlackBright`
+        bgRedBright: [101, 49],
+        bgGreenBright: [102, 49],
+        bgYellowBright: [103, 49],
+        bgBlueBright: [104, 49],
+        bgMagentaBright: [105, 49],
+        bgCyanBright: [106, 49],
+        bgWhiteBright: [107, 49]
+      }
+    };
+    modifierNames = Object.keys(styles.modifier);
+    foregroundColorNames = Object.keys(styles.color);
+    backgroundColorNames = Object.keys(styles.bgColor);
+    colorNames = [...foregroundColorNames, ...backgroundColorNames];
+    ansiStyles = assembleStyles();
+    ansi_styles_default = ansiStyles;
+  }
+});
+
+// node_modules/chalk/source/vendor/supports-color/index.js
+function hasFlag(flag, argv = globalThis.Deno ? globalThis.Deno.args : import_node_process.default.argv) {
+  const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
+  const position = argv.indexOf(prefix + flag);
+  const terminatorPosition = argv.indexOf("--");
+  return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+}
+function envForceColor() {
+  if ("FORCE_COLOR" in env) {
+    if (env.FORCE_COLOR === "true") {
+      return 1;
+    }
+    if (env.FORCE_COLOR === "false") {
+      return 0;
+    }
+    return env.FORCE_COLOR.length === 0 ? 1 : Math.min(Number.parseInt(env.FORCE_COLOR, 10), 3);
+  }
+}
+function translateLevel(level) {
+  if (level === 0) {
+    return false;
+  }
+  return {
+    level,
+    hasBasic: true,
+    has256: level >= 2,
+    has16m: level >= 3
+  };
+}
+function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
+  const noFlagForceColor = envForceColor();
+  if (noFlagForceColor !== void 0) {
+    flagForceColor = noFlagForceColor;
+  }
+  const forceColor = sniffFlags ? flagForceColor : noFlagForceColor;
+  if (forceColor === 0) {
+    return 0;
+  }
+  if (sniffFlags) {
+    if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
+      return 3;
+    }
+    if (hasFlag("color=256")) {
+      return 2;
+    }
+  }
+  if ("TF_BUILD" in env && "AGENT_NAME" in env) {
+    return 1;
+  }
+  if (haveStream && !streamIsTTY && forceColor === void 0) {
+    return 0;
+  }
+  const min = forceColor || 0;
+  if (env.TERM === "dumb") {
+    return min;
+  }
+  if (import_node_process.default.platform === "win32") {
+    const osRelease = import_node_os.default.release().split(".");
+    if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
+      return Number(osRelease[2]) >= 14931 ? 3 : 2;
+    }
+    return 1;
+  }
+  if ("CI" in env) {
+    if (["GITHUB_ACTIONS", "GITEA_ACTIONS", "CIRCLECI"].some((key) => key in env)) {
+      return 3;
+    }
+    if (["TRAVIS", "APPVEYOR", "GITLAB_CI", "BUILDKITE", "DRONE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
+      return 1;
+    }
+    return min;
+  }
+  if ("TEAMCITY_VERSION" in env) {
+    return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
+  }
+  if (env.COLORTERM === "truecolor") {
+    return 3;
+  }
+  if (env.TERM === "xterm-kitty") {
+    return 3;
+  }
+  if ("TERM_PROGRAM" in env) {
+    const version = Number.parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+    switch (env.TERM_PROGRAM) {
+      case "iTerm.app": {
+        return version >= 3 ? 3 : 2;
+      }
+      case "Apple_Terminal": {
+        return 2;
+      }
+    }
+  }
+  if (/-256(color)?$/i.test(env.TERM)) {
+    return 2;
+  }
+  if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
+    return 1;
+  }
+  if ("COLORTERM" in env) {
+    return 1;
+  }
+  return min;
+}
+function createSupportsColor(stream, options = {}) {
+  const level = _supportsColor(stream, {
+    streamIsTTY: stream && stream.isTTY,
+    ...options
+  });
+  return translateLevel(level);
+}
+var import_node_process, import_node_os, import_node_tty, env, flagForceColor, supportsColor, supports_color_default;
+var init_supports_color = __esm({
+  "node_modules/chalk/source/vendor/supports-color/index.js"() {
+    import_node_process = __toESM(require("node:process"), 1);
+    import_node_os = __toESM(require("node:os"), 1);
+    import_node_tty = __toESM(require("node:tty"), 1);
+    ({ env } = import_node_process.default);
+    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
+      flagForceColor = 0;
+    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
+      flagForceColor = 1;
+    }
+    supportsColor = {
+      stdout: createSupportsColor({ isTTY: import_node_tty.default.isatty(1) }),
+      stderr: createSupportsColor({ isTTY: import_node_tty.default.isatty(2) })
+    };
+    supports_color_default = supportsColor;
+  }
+});
+
+// node_modules/chalk/source/utilities.js
+function stringReplaceAll(string, substring, replacer) {
+  let index = string.indexOf(substring);
+  if (index === -1) {
+    return string;
+  }
+  const substringLength = substring.length;
+  let endIndex = 0;
+  let returnValue = "";
+  do {
+    returnValue += string.slice(endIndex, index) + substring + replacer;
+    endIndex = index + substringLength;
+    index = string.indexOf(substring, endIndex);
+  } while (index !== -1);
+  returnValue += string.slice(endIndex);
+  return returnValue;
+}
+function stringEncaseCRLFWithFirstIndex(string, prefix, postfix, index) {
+  let endIndex = 0;
+  let returnValue = "";
+  do {
+    const gotCR = string[index - 1] === "\r";
+    returnValue += string.slice(endIndex, gotCR ? index - 1 : index) + prefix + (gotCR ? "\r\n" : "\n") + postfix;
+    endIndex = index + 1;
+    index = string.indexOf("\n", endIndex);
+  } while (index !== -1);
+  returnValue += string.slice(endIndex);
+  return returnValue;
+}
+var init_utilities = __esm({
+  "node_modules/chalk/source/utilities.js"() {
+  }
+});
+
+// node_modules/chalk/source/index.js
+var source_exports = {};
+__export(source_exports, {
+  Chalk: () => Chalk,
+  backgroundColorNames: () => backgroundColorNames,
+  backgroundColors: () => backgroundColorNames,
+  chalkStderr: () => chalkStderr,
+  colorNames: () => colorNames,
+  colors: () => colorNames,
+  default: () => source_default,
+  foregroundColorNames: () => foregroundColorNames,
+  foregroundColors: () => foregroundColorNames,
+  modifierNames: () => modifierNames,
+  modifiers: () => modifierNames,
+  supportsColor: () => stdoutColor,
+  supportsColorStderr: () => stderrColor
+});
+function createChalk(options) {
+  return chalkFactory(options);
+}
+var stdoutColor, stderrColor, GENERATOR, STYLER, IS_EMPTY, levelMapping, styles2, applyOptions, Chalk, chalkFactory, getModelAnsi, usedModels, proto, createStyler, createBuilder, applyStyle, chalk, chalkStderr, source_default;
+var init_source = __esm({
+  "node_modules/chalk/source/index.js"() {
+    init_ansi_styles();
+    init_supports_color();
+    init_utilities();
+    init_ansi_styles();
+    ({ stdout: stdoutColor, stderr: stderrColor } = supports_color_default);
+    GENERATOR = Symbol("GENERATOR");
+    STYLER = Symbol("STYLER");
+    IS_EMPTY = Symbol("IS_EMPTY");
+    levelMapping = [
+      "ansi",
+      "ansi",
+      "ansi256",
+      "ansi16m"
+    ];
+    styles2 = /* @__PURE__ */ Object.create(null);
+    applyOptions = (object, options = {}) => {
+      if (options.level && !(Number.isInteger(options.level) && options.level >= 0 && options.level <= 3)) {
+        throw new Error("The `level` option should be an integer from 0 to 3");
+      }
+      const colorLevel = stdoutColor ? stdoutColor.level : 0;
+      object.level = options.level === void 0 ? colorLevel : options.level;
+    };
+    Chalk = class {
+      constructor(options) {
+        return chalkFactory(options);
+      }
+    };
+    chalkFactory = (options) => {
+      const chalk3 = (...strings) => strings.join(" ");
+      applyOptions(chalk3, options);
+      Object.setPrototypeOf(chalk3, createChalk.prototype);
+      return chalk3;
+    };
+    Object.setPrototypeOf(createChalk.prototype, Function.prototype);
+    for (const [styleName, style] of Object.entries(ansi_styles_default)) {
+      styles2[styleName] = {
+        get() {
+          const builder = createBuilder(this, createStyler(style.open, style.close, this[STYLER]), this[IS_EMPTY]);
+          Object.defineProperty(this, styleName, { value: builder });
+          return builder;
+        }
+      };
+    }
+    styles2.visible = {
+      get() {
+        const builder = createBuilder(this, this[STYLER], true);
+        Object.defineProperty(this, "visible", { value: builder });
+        return builder;
+      }
+    };
+    getModelAnsi = (model, level, type, ...arguments_) => {
+      if (model === "rgb") {
+        if (level === "ansi16m") {
+          return ansi_styles_default[type].ansi16m(...arguments_);
+        }
+        if (level === "ansi256") {
+          return ansi_styles_default[type].ansi256(ansi_styles_default.rgbToAnsi256(...arguments_));
+        }
+        return ansi_styles_default[type].ansi(ansi_styles_default.rgbToAnsi(...arguments_));
+      }
+      if (model === "hex") {
+        return getModelAnsi("rgb", level, type, ...ansi_styles_default.hexToRgb(...arguments_));
+      }
+      return ansi_styles_default[type][model](...arguments_);
+    };
+    usedModels = ["rgb", "hex", "ansi256"];
+    for (const model of usedModels) {
+      styles2[model] = {
+        get() {
+          const { level } = this;
+          return function(...arguments_) {
+            const styler = createStyler(getModelAnsi(model, levelMapping[level], "color", ...arguments_), ansi_styles_default.color.close, this[STYLER]);
+            return createBuilder(this, styler, this[IS_EMPTY]);
+          };
+        }
+      };
+      const bgModel = "bg" + model[0].toUpperCase() + model.slice(1);
+      styles2[bgModel] = {
+        get() {
+          const { level } = this;
+          return function(...arguments_) {
+            const styler = createStyler(getModelAnsi(model, levelMapping[level], "bgColor", ...arguments_), ansi_styles_default.bgColor.close, this[STYLER]);
+            return createBuilder(this, styler, this[IS_EMPTY]);
+          };
+        }
+      };
+    }
+    proto = Object.defineProperties(() => {
+    }, {
+      ...styles2,
+      level: {
+        enumerable: true,
+        get() {
+          return this[GENERATOR].level;
+        },
+        set(level) {
+          this[GENERATOR].level = level;
+        }
+      }
+    });
+    createStyler = (open, close, parent) => {
+      let openAll;
+      let closeAll;
+      if (parent === void 0) {
+        openAll = open;
+        closeAll = close;
+      } else {
+        openAll = parent.openAll + open;
+        closeAll = close + parent.closeAll;
+      }
+      return {
+        open,
+        close,
+        openAll,
+        closeAll,
+        parent
+      };
+    };
+    createBuilder = (self2, _styler, _isEmpty) => {
+      const builder = (...arguments_) => applyStyle(builder, arguments_.length === 1 ? "" + arguments_[0] : arguments_.join(" "));
+      Object.setPrototypeOf(builder, proto);
+      builder[GENERATOR] = self2;
+      builder[STYLER] = _styler;
+      builder[IS_EMPTY] = _isEmpty;
+      return builder;
+    };
+    applyStyle = (self2, string) => {
+      if (self2.level <= 0 || !string) {
+        return self2[IS_EMPTY] ? "" : string;
+      }
+      let styler = self2[STYLER];
+      if (styler === void 0) {
+        return string;
+      }
+      const { openAll, closeAll } = styler;
+      if (string.includes("\x1B")) {
+        while (styler !== void 0) {
+          string = stringReplaceAll(string, styler.close, styler.open);
+          styler = styler.parent;
+        }
+      }
+      const lfIndex = string.indexOf("\n");
+      if (lfIndex !== -1) {
+        string = stringEncaseCRLFWithFirstIndex(string, closeAll, openAll, lfIndex);
+      }
+      return openAll + string + closeAll;
+    };
+    Object.defineProperties(createChalk.prototype, styles2);
+    chalk = createChalk();
+    chalkStderr = createChalk({ level: stderrColor ? stderrColor.level : 0 });
+    source_default = chalk;
+  }
+});
 
 // node_modules/mimic-fn/index.js
 var require_mimic_fn = __commonJS({
@@ -271,6 +811,59 @@ var require_signal_exit = __commonJS({
     var processReallyExit;
     var originalProcessEmit;
     var processEmit;
+  }
+});
+
+// node_modules/restore-cursor/index.js
+var import_node_process2, import_onetime, import_signal_exit, restoreCursor, restore_cursor_default;
+var init_restore_cursor = __esm({
+  "node_modules/restore-cursor/index.js"() {
+    import_node_process2 = __toESM(require("node:process"), 1);
+    import_onetime = __toESM(require_onetime(), 1);
+    import_signal_exit = __toESM(require_signal_exit(), 1);
+    restoreCursor = (0, import_onetime.default)(() => {
+      (0, import_signal_exit.default)(() => {
+        import_node_process2.default.stderr.write("\x1B[?25h");
+      }, { alwaysLast: true });
+    });
+    restore_cursor_default = restoreCursor;
+  }
+});
+
+// node_modules/cli-cursor/index.js
+var import_node_process3, isHidden, cliCursor, cli_cursor_default;
+var init_cli_cursor = __esm({
+  "node_modules/cli-cursor/index.js"() {
+    import_node_process3 = __toESM(require("node:process"), 1);
+    init_restore_cursor();
+    isHidden = false;
+    cliCursor = {};
+    cliCursor.show = (writableStream = import_node_process3.default.stderr) => {
+      if (!writableStream.isTTY) {
+        return;
+      }
+      isHidden = false;
+      writableStream.write("\x1B[?25h");
+    };
+    cliCursor.hide = (writableStream = import_node_process3.default.stderr) => {
+      if (!writableStream.isTTY) {
+        return;
+      }
+      restore_cursor_default();
+      isHidden = true;
+      writableStream.write("\x1B[?25l");
+    };
+    cliCursor.toggle = (force, writableStream) => {
+      if (force !== void 0) {
+        isHidden = force;
+      }
+      if (isHidden) {
+        cliCursor.show(writableStream);
+      } else {
+        cliCursor.hide(writableStream);
+      }
+    };
+    cli_cursor_default = cliCursor;
   }
 });
 
@@ -1919,6 +2512,72 @@ var require_cli_spinners = __commonJS({
   }
 });
 
+// node_modules/is-unicode-supported/index.js
+function isUnicodeSupported() {
+  if (import_node_process4.default.platform !== "win32") {
+    return import_node_process4.default.env.TERM !== "linux";
+  }
+  return Boolean(import_node_process4.default.env.CI) || Boolean(import_node_process4.default.env.WT_SESSION) || Boolean(import_node_process4.default.env.TERMINUS_SUBLIME) || import_node_process4.default.env.ConEmuTask === "{cmd::Cmder}" || import_node_process4.default.env.TERM_PROGRAM === "Terminus-Sublime" || import_node_process4.default.env.TERM_PROGRAM === "vscode" || import_node_process4.default.env.TERM === "xterm-256color" || import_node_process4.default.env.TERM === "alacritty" || import_node_process4.default.env.TERMINAL_EMULATOR === "JetBrains-JediTerm";
+}
+var import_node_process4;
+var init_is_unicode_supported = __esm({
+  "node_modules/is-unicode-supported/index.js"() {
+    import_node_process4 = __toESM(require("node:process"), 1);
+  }
+});
+
+// node_modules/log-symbols/index.js
+var main, fallback, logSymbols, log_symbols_default;
+var init_log_symbols = __esm({
+  "node_modules/log-symbols/index.js"() {
+    init_source();
+    init_is_unicode_supported();
+    main = {
+      info: source_default.blue("\u2139"),
+      success: source_default.green("\u2714"),
+      warning: source_default.yellow("\u26A0"),
+      error: source_default.red("\u2716")
+    };
+    fallback = {
+      info: source_default.blue("i"),
+      success: source_default.green("\u221A"),
+      warning: source_default.yellow("\u203C"),
+      error: source_default.red("\xD7")
+    };
+    logSymbols = isUnicodeSupported() ? main : fallback;
+    log_symbols_default = logSymbols;
+  }
+});
+
+// node_modules/ansi-regex/index.js
+function ansiRegex({ onlyFirst = false } = {}) {
+  const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
+  const pattern = [
+    `[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?${ST})`,
+    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))"
+  ].join("|");
+  return new RegExp(pattern, onlyFirst ? void 0 : "g");
+}
+var init_ansi_regex = __esm({
+  "node_modules/ansi-regex/index.js"() {
+  }
+});
+
+// node_modules/strip-ansi/index.js
+function stripAnsi(string) {
+  if (typeof string !== "string") {
+    throw new TypeError(`Expected a \`string\`, got \`${typeof string}\``);
+  }
+  return string.replace(regex, "");
+}
+var regex;
+var init_strip_ansi = __esm({
+  "node_modules/strip-ansi/index.js"() {
+    init_ansi_regex();
+    regex = ansiRegex();
+  }
+});
+
 // node_modules/clone/clone.js
 var require_clone = __commonJS({
   "node_modules/clone/clone.js"(exports2, module2) {
@@ -2274,6 +2933,17 @@ var require_wcwidth = __commonJS({
       }
       return false;
     }
+  }
+});
+
+// node_modules/is-interactive/index.js
+function isInteractive({ stream = process.stdout } = {}) {
+  return Boolean(
+    stream && stream.isTTY && process.env.TERM !== "dumb" && !("CI" in process.env)
+  );
+}
+var init_is_interactive = __esm({
+  "node_modules/is-interactive/index.js"() {
   }
 });
 
@@ -5565,6 +6235,413 @@ var require_bl = __commonJS({
   }
 });
 
+// node_modules/stdin-discarder/index.js
+var import_node_process5, import_node_readline, import_bl, ASCII_ETX_CODE, StdinDiscarder, stdinDiscarder, stdin_discarder_default;
+var init_stdin_discarder = __esm({
+  "node_modules/stdin-discarder/index.js"() {
+    import_node_process5 = __toESM(require("node:process"), 1);
+    import_node_readline = __toESM(require("node:readline"), 1);
+    import_bl = __toESM(require_bl(), 1);
+    ASCII_ETX_CODE = 3;
+    StdinDiscarder = class {
+      #requests = 0;
+      #mutedStream = new import_bl.BufferListStream();
+      #ourEmit;
+      #rl;
+      constructor() {
+        this.#mutedStream.pipe(import_node_process5.default.stdout);
+        const self2 = this;
+        this.#ourEmit = function(event, data, ...arguments_) {
+          const { stdin: stdin2 } = import_node_process5.default;
+          if (self2.#requests > 0 || stdin2.emit === self2.#ourEmit) {
+            if (event === "keypress") {
+              return;
+            }
+            if (event === "data" && data.includes(ASCII_ETX_CODE)) {
+              import_node_process5.default.emit("SIGINT");
+            }
+            Reflect.apply(self2.#ourEmit, this, [event, data, ...arguments_]);
+          } else {
+            Reflect.apply(import_node_process5.default.stdin.emit, this, [event, data, ...arguments_]);
+          }
+        };
+      }
+      start() {
+        this.#requests++;
+        if (this.#requests === 1) {
+          this._realStart();
+        }
+      }
+      stop() {
+        if (this.#requests <= 0) {
+          throw new Error("`stop` called more times than `start`");
+        }
+        this.#requests--;
+        if (this.#requests === 0) {
+          this._realStop();
+        }
+      }
+      // TODO: Use private methods when targeting Node.js 14.
+      _realStart() {
+        if (import_node_process5.default.platform === "win32") {
+          return;
+        }
+        this.#rl = import_node_readline.default.createInterface({
+          input: import_node_process5.default.stdin,
+          output: this.#mutedStream
+        });
+        this.#rl.on("SIGINT", () => {
+          if (import_node_process5.default.listenerCount("SIGINT") === 0) {
+            import_node_process5.default.emit("SIGINT");
+          } else {
+            this.#rl.close();
+            import_node_process5.default.kill(import_node_process5.default.pid, "SIGINT");
+          }
+        });
+      }
+      _realStop() {
+        if (import_node_process5.default.platform === "win32") {
+          return;
+        }
+        this.#rl.close();
+        this.#rl = void 0;
+      }
+    };
+    stdinDiscarder = new StdinDiscarder();
+    stdin_discarder_default = stdinDiscarder;
+  }
+});
+
+// node_modules/ora/index.js
+var ora_exports = {};
+__export(ora_exports, {
+  default: () => ora,
+  oraPromise: () => oraPromise,
+  spinners: () => import_cli_spinners2.default
+});
+function ora(options) {
+  return new Ora(options);
+}
+async function oraPromise(action, options) {
+  const actionIsFunction = typeof action === "function";
+  const actionIsPromise = typeof action.then === "function";
+  if (!actionIsFunction && !actionIsPromise) {
+    throw new TypeError("Parameter `action` must be a Function or a Promise");
+  }
+  const { successText, failText } = typeof options === "object" ? options : { successText: void 0, failText: void 0 };
+  const spinner = ora(options).start();
+  try {
+    const promise = actionIsFunction ? action(spinner) : action;
+    const result = await promise;
+    spinner.succeed(
+      successText === void 0 ? void 0 : typeof successText === "string" ? successText : successText(result)
+    );
+    return result;
+  } catch (error) {
+    spinner.fail(
+      failText === void 0 ? void 0 : typeof failText === "string" ? failText : failText(error)
+    );
+    throw error;
+  }
+}
+var import_node_process6, import_cli_spinners, import_wcwidth, import_cli_spinners2, Ora;
+var init_ora = __esm({
+  "node_modules/ora/index.js"() {
+    import_node_process6 = __toESM(require("node:process"), 1);
+    init_source();
+    init_cli_cursor();
+    import_cli_spinners = __toESM(require_cli_spinners(), 1);
+    init_log_symbols();
+    init_strip_ansi();
+    import_wcwidth = __toESM(require_wcwidth(), 1);
+    init_is_interactive();
+    init_is_unicode_supported();
+    init_stdin_discarder();
+    import_cli_spinners2 = __toESM(require_cli_spinners(), 1);
+    Ora = class {
+      #linesToClear = 0;
+      #isDiscardingStdin = false;
+      #lineCount = 0;
+      #frameIndex = 0;
+      #options;
+      #spinner;
+      #stream;
+      #id;
+      #initialInterval;
+      #isEnabled;
+      #isSilent;
+      #indent;
+      #text;
+      #prefixText;
+      #suffixText;
+      color;
+      constructor(options) {
+        if (typeof options === "string") {
+          options = {
+            text: options
+          };
+        }
+        this.#options = {
+          color: "cyan",
+          stream: import_node_process6.default.stderr,
+          discardStdin: true,
+          hideCursor: true,
+          ...options
+        };
+        this.color = this.#options.color;
+        this.spinner = this.#options.spinner;
+        this.#initialInterval = this.#options.interval;
+        this.#stream = this.#options.stream;
+        this.#isEnabled = typeof this.#options.isEnabled === "boolean" ? this.#options.isEnabled : isInteractive({ stream: this.#stream });
+        this.#isSilent = typeof this.#options.isSilent === "boolean" ? this.#options.isSilent : false;
+        this.text = this.#options.text;
+        this.prefixText = this.#options.prefixText;
+        this.suffixText = this.#options.suffixText;
+        this.indent = this.#options.indent;
+        if (import_node_process6.default.env.NODE_ENV === "test") {
+          this._stream = this.#stream;
+          this._isEnabled = this.#isEnabled;
+          Object.defineProperty(this, "_linesToClear", {
+            get() {
+              return this.#linesToClear;
+            },
+            set(newValue) {
+              this.#linesToClear = newValue;
+            }
+          });
+          Object.defineProperty(this, "_frameIndex", {
+            get() {
+              return this.#frameIndex;
+            }
+          });
+          Object.defineProperty(this, "_lineCount", {
+            get() {
+              return this.#lineCount;
+            }
+          });
+        }
+      }
+      get indent() {
+        return this.#indent;
+      }
+      set indent(indent = 0) {
+        if (!(indent >= 0 && Number.isInteger(indent))) {
+          throw new Error("The `indent` option must be an integer from 0 and up");
+        }
+        this.#indent = indent;
+        this.updateLineCount();
+      }
+      get interval() {
+        return this.#initialInterval || this.#spinner.interval || 100;
+      }
+      get spinner() {
+        return this.#spinner;
+      }
+      set spinner(spinner) {
+        this.#frameIndex = 0;
+        this.#initialInterval = void 0;
+        if (typeof spinner === "object") {
+          if (spinner.frames === void 0) {
+            throw new Error("The given spinner must have a `frames` property");
+          }
+          this.#spinner = spinner;
+        } else if (!isUnicodeSupported()) {
+          this.#spinner = import_cli_spinners.default.line;
+        } else if (spinner === void 0) {
+          this.#spinner = import_cli_spinners.default.dots;
+        } else if (spinner !== "default" && import_cli_spinners.default[spinner]) {
+          this.#spinner = import_cli_spinners.default[spinner];
+        } else {
+          throw new Error(`There is no built-in spinner named '${spinner}'. See https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json for a full list.`);
+        }
+      }
+      get text() {
+        return this.#text;
+      }
+      set text(value) {
+        this.#text = value || "";
+        this.updateLineCount();
+      }
+      get prefixText() {
+        return this.#prefixText;
+      }
+      set prefixText(value) {
+        this.#prefixText = value || "";
+        this.updateLineCount();
+      }
+      get suffixText() {
+        return this.#suffixText;
+      }
+      set suffixText(value) {
+        this.#suffixText = value || "";
+        this.updateLineCount();
+      }
+      get isSpinning() {
+        return this.#id !== void 0;
+      }
+      // TODO: Use private methods when targeting Node.js 14.
+      getFullPrefixText(prefixText = this.#prefixText, postfix = " ") {
+        if (typeof prefixText === "string" && prefixText !== "") {
+          return prefixText + postfix;
+        }
+        if (typeof prefixText === "function") {
+          return prefixText() + postfix;
+        }
+        return "";
+      }
+      getFullSuffixText(suffixText = this.#suffixText, prefix = " ") {
+        if (typeof suffixText === "string" && suffixText !== "") {
+          return prefix + suffixText;
+        }
+        if (typeof suffixText === "function") {
+          return prefix + suffixText();
+        }
+        return "";
+      }
+      updateLineCount() {
+        const columns = this.#stream.columns || 80;
+        const fullPrefixText = this.getFullPrefixText(this.#prefixText, "-");
+        const fullSuffixText = this.getFullSuffixText(this.#suffixText, "-");
+        const fullText = " ".repeat(this.#indent) + fullPrefixText + "--" + this.#text + "--" + fullSuffixText;
+        this.#lineCount = 0;
+        for (const line of stripAnsi(fullText).split("\n")) {
+          this.#lineCount += Math.max(1, Math.ceil((0, import_wcwidth.default)(line) / columns));
+        }
+      }
+      get isEnabled() {
+        return this.#isEnabled && !this.#isSilent;
+      }
+      set isEnabled(value) {
+        if (typeof value !== "boolean") {
+          throw new TypeError("The `isEnabled` option must be a boolean");
+        }
+        this.#isEnabled = value;
+      }
+      get isSilent() {
+        return this.#isSilent;
+      }
+      set isSilent(value) {
+        if (typeof value !== "boolean") {
+          throw new TypeError("The `isSilent` option must be a boolean");
+        }
+        this.#isSilent = value;
+      }
+      frame() {
+        const { frames } = this.#spinner;
+        let frame = frames[this.#frameIndex];
+        if (this.color) {
+          frame = source_default[this.color](frame);
+        }
+        this.#frameIndex = ++this.#frameIndex % frames.length;
+        const fullPrefixText = typeof this.#prefixText === "string" && this.#prefixText !== "" ? this.#prefixText + " " : "";
+        const fullText = typeof this.text === "string" ? " " + this.text : "";
+        const fullSuffixText = typeof this.#suffixText === "string" && this.#suffixText !== "" ? " " + this.#suffixText : "";
+        return fullPrefixText + frame + fullText + fullSuffixText;
+      }
+      clear() {
+        if (!this.#isEnabled || !this.#stream.isTTY) {
+          return this;
+        }
+        this.#stream.cursorTo(0);
+        for (let index = 0; index < this.#linesToClear; index++) {
+          if (index > 0) {
+            this.#stream.moveCursor(0, -1);
+          }
+          this.#stream.clearLine(1);
+        }
+        if (this.#indent || this.lastIndent !== this.#indent) {
+          this.#stream.cursorTo(this.#indent);
+        }
+        this.lastIndent = this.#indent;
+        this.#linesToClear = 0;
+        return this;
+      }
+      render() {
+        if (this.#isSilent) {
+          return this;
+        }
+        this.clear();
+        this.#stream.write(this.frame());
+        this.#linesToClear = this.#lineCount;
+        return this;
+      }
+      start(text) {
+        if (text) {
+          this.text = text;
+        }
+        if (this.#isSilent) {
+          return this;
+        }
+        if (!this.#isEnabled) {
+          if (this.text) {
+            this.#stream.write(`- ${this.text}
+`);
+          }
+          return this;
+        }
+        if (this.isSpinning) {
+          return this;
+        }
+        if (this.#options.hideCursor) {
+          cli_cursor_default.hide(this.#stream);
+        }
+        if (this.#options.discardStdin && import_node_process6.default.stdin.isTTY) {
+          this.#isDiscardingStdin = true;
+          stdin_discarder_default.start();
+        }
+        this.render();
+        this.#id = setInterval(this.render.bind(this), this.interval);
+        return this;
+      }
+      stop() {
+        if (!this.#isEnabled) {
+          return this;
+        }
+        clearInterval(this.#id);
+        this.#id = void 0;
+        this.#frameIndex = 0;
+        this.clear();
+        if (this.#options.hideCursor) {
+          cli_cursor_default.show(this.#stream);
+        }
+        if (this.#options.discardStdin && import_node_process6.default.stdin.isTTY && this.#isDiscardingStdin) {
+          stdin_discarder_default.stop();
+          this.#isDiscardingStdin = false;
+        }
+        return this;
+      }
+      succeed(text) {
+        return this.stopAndPersist({ symbol: log_symbols_default.success, text });
+      }
+      fail(text) {
+        return this.stopAndPersist({ symbol: log_symbols_default.error, text });
+      }
+      warn(text) {
+        return this.stopAndPersist({ symbol: log_symbols_default.warning, text });
+      }
+      info(text) {
+        return this.stopAndPersist({ symbol: log_symbols_default.info, text });
+      }
+      stopAndPersist(options = {}) {
+        if (this.#isSilent) {
+          return this;
+        }
+        const prefixText = options.prefixText || this.#prefixText;
+        const fullPrefixText = this.getFullPrefixText(prefixText, " ");
+        const symbolText = options.symbol || " ";
+        const text = options.text || this.text;
+        const fullText = typeof text === "string" ? " " + text : "";
+        const suffixText = options.suffixText !== void 0 ? options.suffixText : this.#suffixText;
+        const fullSuffixText = this.getFullSuffixText(suffixText, " ");
+        const textToWrite = fullPrefixText + symbolText + fullText + fullSuffixText + "\n";
+        this.stop();
+        this.#stream.write(textToWrite);
+        return this;
+      }
+    };
+  }
+});
+
 // node_modules/figlet/lib/figlet.js
 var require_figlet = __commonJS({
   "node_modules/figlet/lib/figlet.js"(exports2, module2) {
@@ -7932,14 +9009,14 @@ var require_templates = __commonJS({
       }
       return results;
     }
-    function buildStyle(chalk2, styles3) {
+    function buildStyle(chalk3, styles3) {
       const enabled = {};
       for (const layer of styles3) {
         for (const style of layer.styles) {
           enabled[style[0]] = layer.inverse ? null : style.slice(1);
         }
       }
-      let current = chalk2;
+      let current = chalk3;
       for (const [styleName, styles4] of Object.entries(enabled)) {
         if (!Array.isArray(styles4)) {
           continue;
@@ -7951,7 +9028,7 @@ var require_templates = __commonJS({
       }
       return current;
     }
-    module2.exports = (chalk2, temporary) => {
+    module2.exports = (chalk3, temporary) => {
       const styles3 = [];
       const chunks = [];
       let chunk = [];
@@ -7961,13 +9038,13 @@ var require_templates = __commonJS({
         } else if (style) {
           const string = chunk.join("");
           chunk = [];
-          chunks.push(styles3.length === 0 ? string : buildStyle(chalk2, styles3)(string));
+          chunks.push(styles3.length === 0 ? string : buildStyle(chalk3, styles3)(string));
           styles3.push({ inverse, styles: parseStyle(style) });
         } else if (close) {
           if (styles3.length === 0) {
             throw new Error("Found extraneous } in Chalk template literal");
           }
-          chunks.push(buildStyle(chalk2, styles3)(chunk.join("")));
+          chunks.push(buildStyle(chalk3, styles3)(chunk.join("")));
           chunk = [];
           styles3.pop();
         } else {
@@ -8015,18 +9092,18 @@ var require_source = __commonJS({
       }
     };
     var chalkFactory2 = (options) => {
-      const chalk3 = {};
-      applyOptions2(chalk3, options);
-      chalk3.template = (...arguments_) => chalkTag(chalk3.template, ...arguments_);
-      Object.setPrototypeOf(chalk3, Chalk.prototype);
-      Object.setPrototypeOf(chalk3.template, chalk3);
-      chalk3.template.constructor = () => {
+      const chalk4 = {};
+      applyOptions2(chalk4, options);
+      chalk4.template = (...arguments_) => chalkTag(chalk4.template, ...arguments_);
+      Object.setPrototypeOf(chalk4, Chalk2.prototype);
+      Object.setPrototypeOf(chalk4.template, chalk4);
+      chalk4.template.constructor = () => {
         throw new Error("`chalk.constructor()` is deprecated. Use `new chalk.Instance()` instead.");
       };
-      chalk3.template.Instance = ChalkClass;
-      return chalk3.template;
+      chalk4.template.Instance = ChalkClass;
+      return chalk4.template;
     };
-    function Chalk(options) {
+    function Chalk2(options) {
       return chalkFactory2(options);
     }
     for (const [styleName, style] of Object.entries(ansiStyles2)) {
@@ -8135,7 +9212,7 @@ var require_source = __commonJS({
       return openAll + string + closeAll;
     };
     var template;
-    var chalkTag = (chalk3, ...strings) => {
+    var chalkTag = (chalk4, ...strings) => {
       const [firstString] = strings;
       if (!isArray(firstString) || !isArray(firstString.raw)) {
         return strings.join(" ");
@@ -8151,14 +9228,14 @@ var require_source = __commonJS({
       if (template === void 0) {
         template = require_templates();
       }
-      return template(chalk3, parts.join(""));
+      return template(chalk4, parts.join(""));
     };
-    Object.defineProperties(Chalk.prototype, styles3);
-    var chalk2 = Chalk();
-    chalk2.supportsColor = stdoutColor2;
-    chalk2.stderr = Chalk({ level: stderrColor2 ? stderrColor2.level : 0 });
-    chalk2.stderr.supportsColor = stderrColor2;
-    module2.exports = chalk2;
+    Object.defineProperties(Chalk2.prototype, styles3);
+    var chalk3 = Chalk2();
+    chalk3.supportsColor = stdoutColor2;
+    chalk3.stderr = Chalk2({ level: stderrColor2 ? stderrColor2.level : 0 });
+    chalk3.stderr.supportsColor = stderrColor2;
+    module2.exports = chalk3;
   }
 });
 
@@ -9456,7 +10533,7 @@ var require_tinygradient = __commonJS({
 var require_gradient_string = __commonJS({
   "node_modules/gradient-string/index.js"(exports2, module2) {
     "use strict";
-    var chalk2 = require_source();
+    var chalk3 = require_source();
     var tinygradient = require_tinygradient();
     var forbiddenChars = /\s/g;
     function InitGradient(...args) {
@@ -9472,7 +10549,7 @@ var require_gradient_string = __commonJS({
       const colors = getColors(gradient2, options, colorsCount);
       let result = "";
       for (const s of str) {
-        result += s.match(forbiddenChars) ? s : chalk2.hex(colors.shift().toHex())(s);
+        result += s.match(forbiddenChars) ? s : chalk3.hex(colors.shift().toHex())(s);
       }
       return result;
     }
@@ -9486,7 +10563,7 @@ var require_gradient_string = __commonJS({
         const lineColors = colors.slice(0);
         let lineResult = "";
         for (const l of line) {
-          lineResult += chalk2.hex(lineColors.shift().toHex())(l);
+          lineResult += chalk3.hex(lineColors.shift().toHex())(l);
         }
         results.push(lineResult);
       }
@@ -9529,984 +10606,32 @@ var require_gradient_string = __commonJS({
 });
 
 // src/index.js
-var import_child_process = require("child_process");
-var import_util = require("util");
-
-// node_modules/chalk/source/vendor/ansi-styles/index.js
-var ANSI_BACKGROUND_OFFSET = 10;
-var wrapAnsi16 = (offset = 0) => (code) => `\x1B[${code + offset}m`;
-var wrapAnsi256 = (offset = 0) => (code) => `\x1B[${38 + offset};5;${code}m`;
-var wrapAnsi16m = (offset = 0) => (red, green, blue) => `\x1B[${38 + offset};2;${red};${green};${blue}m`;
-var styles = {
-  modifier: {
-    reset: [0, 0],
-    // 21 isn't widely supported and 22 does the same thing
-    bold: [1, 22],
-    dim: [2, 22],
-    italic: [3, 23],
-    underline: [4, 24],
-    overline: [53, 55],
-    inverse: [7, 27],
-    hidden: [8, 28],
-    strikethrough: [9, 29]
-  },
-  color: {
-    black: [30, 39],
-    red: [31, 39],
-    green: [32, 39],
-    yellow: [33, 39],
-    blue: [34, 39],
-    magenta: [35, 39],
-    cyan: [36, 39],
-    white: [37, 39],
-    // Bright color
-    blackBright: [90, 39],
-    gray: [90, 39],
-    // Alias of `blackBright`
-    grey: [90, 39],
-    // Alias of `blackBright`
-    redBright: [91, 39],
-    greenBright: [92, 39],
-    yellowBright: [93, 39],
-    blueBright: [94, 39],
-    magentaBright: [95, 39],
-    cyanBright: [96, 39],
-    whiteBright: [97, 39]
-  },
-  bgColor: {
-    bgBlack: [40, 49],
-    bgRed: [41, 49],
-    bgGreen: [42, 49],
-    bgYellow: [43, 49],
-    bgBlue: [44, 49],
-    bgMagenta: [45, 49],
-    bgCyan: [46, 49],
-    bgWhite: [47, 49],
-    // Bright color
-    bgBlackBright: [100, 49],
-    bgGray: [100, 49],
-    // Alias of `bgBlackBright`
-    bgGrey: [100, 49],
-    // Alias of `bgBlackBright`
-    bgRedBright: [101, 49],
-    bgGreenBright: [102, 49],
-    bgYellowBright: [103, 49],
-    bgBlueBright: [104, 49],
-    bgMagentaBright: [105, 49],
-    bgCyanBright: [106, 49],
-    bgWhiteBright: [107, 49]
-  }
-};
-var modifierNames = Object.keys(styles.modifier);
-var foregroundColorNames = Object.keys(styles.color);
-var backgroundColorNames = Object.keys(styles.bgColor);
-var colorNames = [...foregroundColorNames, ...backgroundColorNames];
-function assembleStyles() {
-  const codes = /* @__PURE__ */ new Map();
-  for (const [groupName, group] of Object.entries(styles)) {
-    for (const [styleName, style] of Object.entries(group)) {
-      styles[styleName] = {
-        open: `\x1B[${style[0]}m`,
-        close: `\x1B[${style[1]}m`
-      };
-      group[styleName] = styles[styleName];
-      codes.set(style[0], style[1]);
-    }
-    Object.defineProperty(styles, groupName, {
-      value: group,
-      enumerable: false
-    });
-  }
-  Object.defineProperty(styles, "codes", {
-    value: codes,
-    enumerable: false
-  });
-  styles.color.close = "\x1B[39m";
-  styles.bgColor.close = "\x1B[49m";
-  styles.color.ansi = wrapAnsi16();
-  styles.color.ansi256 = wrapAnsi256();
-  styles.color.ansi16m = wrapAnsi16m();
-  styles.bgColor.ansi = wrapAnsi16(ANSI_BACKGROUND_OFFSET);
-  styles.bgColor.ansi256 = wrapAnsi256(ANSI_BACKGROUND_OFFSET);
-  styles.bgColor.ansi16m = wrapAnsi16m(ANSI_BACKGROUND_OFFSET);
-  Object.defineProperties(styles, {
-    rgbToAnsi256: {
-      value(red, green, blue) {
-        if (red === green && green === blue) {
-          if (red < 8) {
-            return 16;
-          }
-          if (red > 248) {
-            return 231;
-          }
-          return Math.round((red - 8) / 247 * 24) + 232;
-        }
-        return 16 + 36 * Math.round(red / 255 * 5) + 6 * Math.round(green / 255 * 5) + Math.round(blue / 255 * 5);
-      },
-      enumerable: false
-    },
-    hexToRgb: {
-      value(hex) {
-        const matches = /[a-f\d]{6}|[a-f\d]{3}/i.exec(hex.toString(16));
-        if (!matches) {
-          return [0, 0, 0];
-        }
-        let [colorString] = matches;
-        if (colorString.length === 3) {
-          colorString = [...colorString].map((character) => character + character).join("");
-        }
-        const integer = Number.parseInt(colorString, 16);
-        return [
-          /* eslint-disable no-bitwise */
-          integer >> 16 & 255,
-          integer >> 8 & 255,
-          integer & 255
-          /* eslint-enable no-bitwise */
-        ];
-      },
-      enumerable: false
-    },
-    hexToAnsi256: {
-      value: (hex) => styles.rgbToAnsi256(...styles.hexToRgb(hex)),
-      enumerable: false
-    },
-    ansi256ToAnsi: {
-      value(code) {
-        if (code < 8) {
-          return 30 + code;
-        }
-        if (code < 16) {
-          return 90 + (code - 8);
-        }
-        let red;
-        let green;
-        let blue;
-        if (code >= 232) {
-          red = ((code - 232) * 10 + 8) / 255;
-          green = red;
-          blue = red;
-        } else {
-          code -= 16;
-          const remainder = code % 36;
-          red = Math.floor(code / 36) / 5;
-          green = Math.floor(remainder / 6) / 5;
-          blue = remainder % 6 / 5;
-        }
-        const value = Math.max(red, green, blue) * 2;
-        if (value === 0) {
-          return 30;
-        }
-        let result = 30 + (Math.round(blue) << 2 | Math.round(green) << 1 | Math.round(red));
-        if (value === 2) {
-          result += 60;
-        }
-        return result;
-      },
-      enumerable: false
-    },
-    rgbToAnsi: {
-      value: (red, green, blue) => styles.ansi256ToAnsi(styles.rgbToAnsi256(red, green, blue)),
-      enumerable: false
-    },
-    hexToAnsi: {
-      value: (hex) => styles.ansi256ToAnsi(styles.hexToAnsi256(hex)),
-      enumerable: false
-    }
-  });
-  return styles;
-}
-var ansiStyles = assembleStyles();
-var ansi_styles_default = ansiStyles;
-
-// node_modules/chalk/source/vendor/supports-color/index.js
-var import_node_process = __toESM(require("node:process"), 1);
-var import_node_os = __toESM(require("node:os"), 1);
-var import_node_tty = __toESM(require("node:tty"), 1);
-function hasFlag(flag, argv = globalThis.Deno ? globalThis.Deno.args : import_node_process.default.argv) {
-  const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-  const position = argv.indexOf(prefix + flag);
-  const terminatorPosition = argv.indexOf("--");
-  return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
-}
-var { env } = import_node_process.default;
-var flagForceColor;
-if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
-  flagForceColor = 0;
-} else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
-  flagForceColor = 1;
-}
-function envForceColor() {
-  if ("FORCE_COLOR" in env) {
-    if (env.FORCE_COLOR === "true") {
-      return 1;
-    }
-    if (env.FORCE_COLOR === "false") {
-      return 0;
-    }
-    return env.FORCE_COLOR.length === 0 ? 1 : Math.min(Number.parseInt(env.FORCE_COLOR, 10), 3);
-  }
-}
-function translateLevel(level) {
-  if (level === 0) {
-    return false;
-  }
-  return {
-    level,
-    hasBasic: true,
-    has256: level >= 2,
-    has16m: level >= 3
-  };
-}
-function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
-  const noFlagForceColor = envForceColor();
-  if (noFlagForceColor !== void 0) {
-    flagForceColor = noFlagForceColor;
-  }
-  const forceColor = sniffFlags ? flagForceColor : noFlagForceColor;
-  if (forceColor === 0) {
-    return 0;
-  }
-  if (sniffFlags) {
-    if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
-      return 3;
-    }
-    if (hasFlag("color=256")) {
-      return 2;
-    }
-  }
-  if ("TF_BUILD" in env && "AGENT_NAME" in env) {
-    return 1;
-  }
-  if (haveStream && !streamIsTTY && forceColor === void 0) {
-    return 0;
-  }
-  const min = forceColor || 0;
-  if (env.TERM === "dumb") {
-    return min;
-  }
-  if (import_node_process.default.platform === "win32") {
-    const osRelease = import_node_os.default.release().split(".");
-    if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
-      return Number(osRelease[2]) >= 14931 ? 3 : 2;
-    }
-    return 1;
-  }
-  if ("CI" in env) {
-    if (["GITHUB_ACTIONS", "GITEA_ACTIONS", "CIRCLECI"].some((key) => key in env)) {
-      return 3;
-    }
-    if (["TRAVIS", "APPVEYOR", "GITLAB_CI", "BUILDKITE", "DRONE"].some((sign) => sign in env) || env.CI_NAME === "codeship") {
-      return 1;
-    }
-    return min;
-  }
-  if ("TEAMCITY_VERSION" in env) {
-    return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env.TEAMCITY_VERSION) ? 1 : 0;
-  }
-  if (env.COLORTERM === "truecolor") {
-    return 3;
-  }
-  if (env.TERM === "xterm-kitty") {
-    return 3;
-  }
-  if ("TERM_PROGRAM" in env) {
-    const version = Number.parseInt((env.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
-    switch (env.TERM_PROGRAM) {
-      case "iTerm.app": {
-        return version >= 3 ? 3 : 2;
-      }
-      case "Apple_Terminal": {
-        return 2;
-      }
-    }
-  }
-  if (/-256(color)?$/i.test(env.TERM)) {
-    return 2;
-  }
-  if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env.TERM)) {
-    return 1;
-  }
-  if ("COLORTERM" in env) {
-    return 1;
-  }
-  return min;
-}
-function createSupportsColor(stream, options = {}) {
-  const level = _supportsColor(stream, {
-    streamIsTTY: stream && stream.isTTY,
-    ...options
-  });
-  return translateLevel(level);
-}
-var supportsColor = {
-  stdout: createSupportsColor({ isTTY: import_node_tty.default.isatty(1) }),
-  stderr: createSupportsColor({ isTTY: import_node_tty.default.isatty(2) })
-};
-var supports_color_default = supportsColor;
-
-// node_modules/chalk/source/utilities.js
-function stringReplaceAll(string, substring, replacer) {
-  let index = string.indexOf(substring);
-  if (index === -1) {
-    return string;
-  }
-  const substringLength = substring.length;
-  let endIndex = 0;
-  let returnValue = "";
-  do {
-    returnValue += string.slice(endIndex, index) + substring + replacer;
-    endIndex = index + substringLength;
-    index = string.indexOf(substring, endIndex);
-  } while (index !== -1);
-  returnValue += string.slice(endIndex);
-  return returnValue;
-}
-function stringEncaseCRLFWithFirstIndex(string, prefix, postfix, index) {
-  let endIndex = 0;
-  let returnValue = "";
-  do {
-    const gotCR = string[index - 1] === "\r";
-    returnValue += string.slice(endIndex, gotCR ? index - 1 : index) + prefix + (gotCR ? "\r\n" : "\n") + postfix;
-    endIndex = index + 1;
-    index = string.indexOf("\n", endIndex);
-  } while (index !== -1);
-  returnValue += string.slice(endIndex);
-  return returnValue;
-}
-
-// node_modules/chalk/source/index.js
-var { stdout: stdoutColor, stderr: stderrColor } = supports_color_default;
-var GENERATOR = Symbol("GENERATOR");
-var STYLER = Symbol("STYLER");
-var IS_EMPTY = Symbol("IS_EMPTY");
-var levelMapping = [
-  "ansi",
-  "ansi",
-  "ansi256",
-  "ansi16m"
-];
-var styles2 = /* @__PURE__ */ Object.create(null);
-var applyOptions = (object, options = {}) => {
-  if (options.level && !(Number.isInteger(options.level) && options.level >= 0 && options.level <= 3)) {
-    throw new Error("The `level` option should be an integer from 0 to 3");
-  }
-  const colorLevel = stdoutColor ? stdoutColor.level : 0;
-  object.level = options.level === void 0 ? colorLevel : options.level;
-};
-var chalkFactory = (options) => {
-  const chalk2 = (...strings) => strings.join(" ");
-  applyOptions(chalk2, options);
-  Object.setPrototypeOf(chalk2, createChalk.prototype);
-  return chalk2;
-};
-function createChalk(options) {
-  return chalkFactory(options);
-}
-Object.setPrototypeOf(createChalk.prototype, Function.prototype);
-for (const [styleName, style] of Object.entries(ansi_styles_default)) {
-  styles2[styleName] = {
-    get() {
-      const builder = createBuilder(this, createStyler(style.open, style.close, this[STYLER]), this[IS_EMPTY]);
-      Object.defineProperty(this, styleName, { value: builder });
-      return builder;
-    }
-  };
-}
-styles2.visible = {
-  get() {
-    const builder = createBuilder(this, this[STYLER], true);
-    Object.defineProperty(this, "visible", { value: builder });
-    return builder;
-  }
-};
-var getModelAnsi = (model, level, type, ...arguments_) => {
-  if (model === "rgb") {
-    if (level === "ansi16m") {
-      return ansi_styles_default[type].ansi16m(...arguments_);
-    }
-    if (level === "ansi256") {
-      return ansi_styles_default[type].ansi256(ansi_styles_default.rgbToAnsi256(...arguments_));
-    }
-    return ansi_styles_default[type].ansi(ansi_styles_default.rgbToAnsi(...arguments_));
-  }
-  if (model === "hex") {
-    return getModelAnsi("rgb", level, type, ...ansi_styles_default.hexToRgb(...arguments_));
-  }
-  return ansi_styles_default[type][model](...arguments_);
-};
-var usedModels = ["rgb", "hex", "ansi256"];
-for (const model of usedModels) {
-  styles2[model] = {
-    get() {
-      const { level } = this;
-      return function(...arguments_) {
-        const styler = createStyler(getModelAnsi(model, levelMapping[level], "color", ...arguments_), ansi_styles_default.color.close, this[STYLER]);
-        return createBuilder(this, styler, this[IS_EMPTY]);
-      };
-    }
-  };
-  const bgModel = "bg" + model[0].toUpperCase() + model.slice(1);
-  styles2[bgModel] = {
-    get() {
-      const { level } = this;
-      return function(...arguments_) {
-        const styler = createStyler(getModelAnsi(model, levelMapping[level], "bgColor", ...arguments_), ansi_styles_default.bgColor.close, this[STYLER]);
-        return createBuilder(this, styler, this[IS_EMPTY]);
-      };
-    }
-  };
-}
-var proto = Object.defineProperties(() => {
-}, {
-  ...styles2,
-  level: {
-    enumerable: true,
-    get() {
-      return this[GENERATOR].level;
-    },
-    set(level) {
-      this[GENERATOR].level = level;
-    }
-  }
-});
-var createStyler = (open, close, parent) => {
-  let openAll;
-  let closeAll;
-  if (parent === void 0) {
-    openAll = open;
-    closeAll = close;
-  } else {
-    openAll = parent.openAll + open;
-    closeAll = close + parent.closeAll;
-  }
-  return {
-    open,
-    close,
-    openAll,
-    closeAll,
-    parent
-  };
-};
-var createBuilder = (self2, _styler, _isEmpty) => {
-  const builder = (...arguments_) => applyStyle(builder, arguments_.length === 1 ? "" + arguments_[0] : arguments_.join(" "));
-  Object.setPrototypeOf(builder, proto);
-  builder[GENERATOR] = self2;
-  builder[STYLER] = _styler;
-  builder[IS_EMPTY] = _isEmpty;
-  return builder;
-};
-var applyStyle = (self2, string) => {
-  if (self2.level <= 0 || !string) {
-    return self2[IS_EMPTY] ? "" : string;
-  }
-  let styler = self2[STYLER];
-  if (styler === void 0) {
-    return string;
-  }
-  const { openAll, closeAll } = styler;
-  if (string.includes("\x1B")) {
-    while (styler !== void 0) {
-      string = stringReplaceAll(string, styler.close, styler.open);
-      styler = styler.parent;
-    }
-  }
-  const lfIndex = string.indexOf("\n");
-  if (lfIndex !== -1) {
-    string = stringEncaseCRLFWithFirstIndex(string, closeAll, openAll, lfIndex);
-  }
-  return openAll + string + closeAll;
-};
-Object.defineProperties(createChalk.prototype, styles2);
-var chalk = createChalk();
-var chalkStderr = createChalk({ level: stderrColor ? stderrColor.level : 0 });
-var source_default = chalk;
-
-// node_modules/ora/index.js
-var import_node_process6 = __toESM(require("node:process"), 1);
-
-// node_modules/cli-cursor/index.js
-var import_node_process3 = __toESM(require("node:process"), 1);
-
-// node_modules/restore-cursor/index.js
-var import_node_process2 = __toESM(require("node:process"), 1);
-var import_onetime = __toESM(require_onetime(), 1);
-var import_signal_exit = __toESM(require_signal_exit(), 1);
-var restoreCursor = (0, import_onetime.default)(() => {
-  (0, import_signal_exit.default)(() => {
-    import_node_process2.default.stderr.write("\x1B[?25h");
-  }, { alwaysLast: true });
-});
-var restore_cursor_default = restoreCursor;
-
-// node_modules/cli-cursor/index.js
-var isHidden = false;
-var cliCursor = {};
-cliCursor.show = (writableStream = import_node_process3.default.stderr) => {
-  if (!writableStream.isTTY) {
-    return;
-  }
-  isHidden = false;
-  writableStream.write("\x1B[?25h");
-};
-cliCursor.hide = (writableStream = import_node_process3.default.stderr) => {
-  if (!writableStream.isTTY) {
-    return;
-  }
-  restore_cursor_default();
-  isHidden = true;
-  writableStream.write("\x1B[?25l");
-};
-cliCursor.toggle = (force, writableStream) => {
-  if (force !== void 0) {
-    isHidden = force;
-  }
-  if (isHidden) {
-    cliCursor.show(writableStream);
-  } else {
-    cliCursor.hide(writableStream);
-  }
-};
-var cli_cursor_default = cliCursor;
-
-// node_modules/ora/index.js
-var import_cli_spinners = __toESM(require_cli_spinners(), 1);
-
-// node_modules/is-unicode-supported/index.js
-var import_node_process4 = __toESM(require("node:process"), 1);
-function isUnicodeSupported() {
-  if (import_node_process4.default.platform !== "win32") {
-    return import_node_process4.default.env.TERM !== "linux";
-  }
-  return Boolean(import_node_process4.default.env.CI) || Boolean(import_node_process4.default.env.WT_SESSION) || Boolean(import_node_process4.default.env.TERMINUS_SUBLIME) || import_node_process4.default.env.ConEmuTask === "{cmd::Cmder}" || import_node_process4.default.env.TERM_PROGRAM === "Terminus-Sublime" || import_node_process4.default.env.TERM_PROGRAM === "vscode" || import_node_process4.default.env.TERM === "xterm-256color" || import_node_process4.default.env.TERM === "alacritty" || import_node_process4.default.env.TERMINAL_EMULATOR === "JetBrains-JediTerm";
-}
-
-// node_modules/log-symbols/index.js
-var main = {
-  info: source_default.blue("\u2139"),
-  success: source_default.green("\u2714"),
-  warning: source_default.yellow("\u26A0"),
-  error: source_default.red("\u2716")
-};
-var fallback = {
-  info: source_default.blue("i"),
-  success: source_default.green("\u221A"),
-  warning: source_default.yellow("\u203C"),
-  error: source_default.red("\xD7")
-};
-var logSymbols = isUnicodeSupported() ? main : fallback;
-var log_symbols_default = logSymbols;
-
-// node_modules/ansi-regex/index.js
-function ansiRegex({ onlyFirst = false } = {}) {
-  const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
-  const pattern = [
-    `[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]+)*|[a-zA-Z\\d]+(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?${ST})`,
-    "(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]))"
-  ].join("|");
-  return new RegExp(pattern, onlyFirst ? void 0 : "g");
-}
-
-// node_modules/strip-ansi/index.js
-var regex = ansiRegex();
-function stripAnsi(string) {
-  if (typeof string !== "string") {
-    throw new TypeError(`Expected a \`string\`, got \`${typeof string}\``);
-  }
-  return string.replace(regex, "");
-}
-
-// node_modules/ora/index.js
-var import_wcwidth = __toESM(require_wcwidth(), 1);
-
-// node_modules/is-interactive/index.js
-function isInteractive({ stream = process.stdout } = {}) {
-  return Boolean(
-    stream && stream.isTTY && process.env.TERM !== "dumb" && !("CI" in process.env)
-  );
-}
-
-// node_modules/stdin-discarder/index.js
-var import_node_process5 = __toESM(require("node:process"), 1);
-var import_node_readline = __toESM(require("node:readline"), 1);
-var import_bl = __toESM(require_bl(), 1);
-var ASCII_ETX_CODE = 3;
-var StdinDiscarder = class {
-  #requests = 0;
-  #mutedStream = new import_bl.BufferListStream();
-  #ourEmit;
-  #rl;
-  constructor() {
-    this.#mutedStream.pipe(import_node_process5.default.stdout);
-    const self2 = this;
-    this.#ourEmit = function(event, data, ...arguments_) {
-      const { stdin: stdin2 } = import_node_process5.default;
-      if (self2.#requests > 0 || stdin2.emit === self2.#ourEmit) {
-        if (event === "keypress") {
-          return;
-        }
-        if (event === "data" && data.includes(ASCII_ETX_CODE)) {
-          import_node_process5.default.emit("SIGINT");
-        }
-        Reflect.apply(self2.#ourEmit, this, [event, data, ...arguments_]);
-      } else {
-        Reflect.apply(import_node_process5.default.stdin.emit, this, [event, data, ...arguments_]);
-      }
-    };
-  }
-  start() {
-    this.#requests++;
-    if (this.#requests === 1) {
-      this._realStart();
-    }
-  }
-  stop() {
-    if (this.#requests <= 0) {
-      throw new Error("`stop` called more times than `start`");
-    }
-    this.#requests--;
-    if (this.#requests === 0) {
-      this._realStop();
-    }
-  }
-  // TODO: Use private methods when targeting Node.js 14.
-  _realStart() {
-    if (import_node_process5.default.platform === "win32") {
-      return;
-    }
-    this.#rl = import_node_readline.default.createInterface({
-      input: import_node_process5.default.stdin,
-      output: this.#mutedStream
-    });
-    this.#rl.on("SIGINT", () => {
-      if (import_node_process5.default.listenerCount("SIGINT") === 0) {
-        import_node_process5.default.emit("SIGINT");
-      } else {
-        this.#rl.close();
-        import_node_process5.default.kill(import_node_process5.default.pid, "SIGINT");
-      }
-    });
-  }
-  _realStop() {
-    if (import_node_process5.default.platform === "win32") {
-      return;
-    }
-    this.#rl.close();
-    this.#rl = void 0;
-  }
-};
-var stdinDiscarder = new StdinDiscarder();
-var stdin_discarder_default = stdinDiscarder;
-
-// node_modules/ora/index.js
-var import_cli_spinners2 = __toESM(require_cli_spinners(), 1);
-var Ora = class {
-  #linesToClear = 0;
-  #isDiscardingStdin = false;
-  #lineCount = 0;
-  #frameIndex = 0;
-  #options;
-  #spinner;
-  #stream;
-  #id;
-  #initialInterval;
-  #isEnabled;
-  #isSilent;
-  #indent;
-  #text;
-  #prefixText;
-  #suffixText;
-  color;
-  constructor(options) {
-    if (typeof options === "string") {
-      options = {
-        text: options
-      };
-    }
-    this.#options = {
-      color: "cyan",
-      stream: import_node_process6.default.stderr,
-      discardStdin: true,
-      hideCursor: true,
-      ...options
-    };
-    this.color = this.#options.color;
-    this.spinner = this.#options.spinner;
-    this.#initialInterval = this.#options.interval;
-    this.#stream = this.#options.stream;
-    this.#isEnabled = typeof this.#options.isEnabled === "boolean" ? this.#options.isEnabled : isInteractive({ stream: this.#stream });
-    this.#isSilent = typeof this.#options.isSilent === "boolean" ? this.#options.isSilent : false;
-    this.text = this.#options.text;
-    this.prefixText = this.#options.prefixText;
-    this.suffixText = this.#options.suffixText;
-    this.indent = this.#options.indent;
-    if (import_node_process6.default.env.NODE_ENV === "test") {
-      this._stream = this.#stream;
-      this._isEnabled = this.#isEnabled;
-      Object.defineProperty(this, "_linesToClear", {
-        get() {
-          return this.#linesToClear;
-        },
-        set(newValue) {
-          this.#linesToClear = newValue;
-        }
-      });
-      Object.defineProperty(this, "_frameIndex", {
-        get() {
-          return this.#frameIndex;
-        }
-      });
-      Object.defineProperty(this, "_lineCount", {
-        get() {
-          return this.#lineCount;
-        }
-      });
-    }
-  }
-  get indent() {
-    return this.#indent;
-  }
-  set indent(indent = 0) {
-    if (!(indent >= 0 && Number.isInteger(indent))) {
-      throw new Error("The `indent` option must be an integer from 0 and up");
-    }
-    this.#indent = indent;
-    this.updateLineCount();
-  }
-  get interval() {
-    return this.#initialInterval || this.#spinner.interval || 100;
-  }
-  get spinner() {
-    return this.#spinner;
-  }
-  set spinner(spinner) {
-    this.#frameIndex = 0;
-    this.#initialInterval = void 0;
-    if (typeof spinner === "object") {
-      if (spinner.frames === void 0) {
-        throw new Error("The given spinner must have a `frames` property");
-      }
-      this.#spinner = spinner;
-    } else if (!isUnicodeSupported()) {
-      this.#spinner = import_cli_spinners.default.line;
-    } else if (spinner === void 0) {
-      this.#spinner = import_cli_spinners.default.dots;
-    } else if (spinner !== "default" && import_cli_spinners.default[spinner]) {
-      this.#spinner = import_cli_spinners.default[spinner];
-    } else {
-      throw new Error(`There is no built-in spinner named '${spinner}'. See https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json for a full list.`);
-    }
-  }
-  get text() {
-    return this.#text;
-  }
-  set text(value) {
-    this.#text = value || "";
-    this.updateLineCount();
-  }
-  get prefixText() {
-    return this.#prefixText;
-  }
-  set prefixText(value) {
-    this.#prefixText = value || "";
-    this.updateLineCount();
-  }
-  get suffixText() {
-    return this.#suffixText;
-  }
-  set suffixText(value) {
-    this.#suffixText = value || "";
-    this.updateLineCount();
-  }
-  get isSpinning() {
-    return this.#id !== void 0;
-  }
-  // TODO: Use private methods when targeting Node.js 14.
-  getFullPrefixText(prefixText = this.#prefixText, postfix = " ") {
-    if (typeof prefixText === "string" && prefixText !== "") {
-      return prefixText + postfix;
-    }
-    if (typeof prefixText === "function") {
-      return prefixText() + postfix;
-    }
-    return "";
-  }
-  getFullSuffixText(suffixText = this.#suffixText, prefix = " ") {
-    if (typeof suffixText === "string" && suffixText !== "") {
-      return prefix + suffixText;
-    }
-    if (typeof suffixText === "function") {
-      return prefix + suffixText();
-    }
-    return "";
-  }
-  updateLineCount() {
-    const columns = this.#stream.columns || 80;
-    const fullPrefixText = this.getFullPrefixText(this.#prefixText, "-");
-    const fullSuffixText = this.getFullSuffixText(this.#suffixText, "-");
-    const fullText = " ".repeat(this.#indent) + fullPrefixText + "--" + this.#text + "--" + fullSuffixText;
-    this.#lineCount = 0;
-    for (const line of stripAnsi(fullText).split("\n")) {
-      this.#lineCount += Math.max(1, Math.ceil((0, import_wcwidth.default)(line) / columns));
-    }
-  }
-  get isEnabled() {
-    return this.#isEnabled && !this.#isSilent;
-  }
-  set isEnabled(value) {
-    if (typeof value !== "boolean") {
-      throw new TypeError("The `isEnabled` option must be a boolean");
-    }
-    this.#isEnabled = value;
-  }
-  get isSilent() {
-    return this.#isSilent;
-  }
-  set isSilent(value) {
-    if (typeof value !== "boolean") {
-      throw new TypeError("The `isSilent` option must be a boolean");
-    }
-    this.#isSilent = value;
-  }
-  frame() {
-    const { frames } = this.#spinner;
-    let frame = frames[this.#frameIndex];
-    if (this.color) {
-      frame = source_default[this.color](frame);
-    }
-    this.#frameIndex = ++this.#frameIndex % frames.length;
-    const fullPrefixText = typeof this.#prefixText === "string" && this.#prefixText !== "" ? this.#prefixText + " " : "";
-    const fullText = typeof this.text === "string" ? " " + this.text : "";
-    const fullSuffixText = typeof this.#suffixText === "string" && this.#suffixText !== "" ? " " + this.#suffixText : "";
-    return fullPrefixText + frame + fullText + fullSuffixText;
-  }
-  clear() {
-    if (!this.#isEnabled || !this.#stream.isTTY) {
-      return this;
-    }
-    this.#stream.cursorTo(0);
-    for (let index = 0; index < this.#linesToClear; index++) {
-      if (index > 0) {
-        this.#stream.moveCursor(0, -1);
-      }
-      this.#stream.clearLine(1);
-    }
-    if (this.#indent || this.lastIndent !== this.#indent) {
-      this.#stream.cursorTo(this.#indent);
-    }
-    this.lastIndent = this.#indent;
-    this.#linesToClear = 0;
-    return this;
-  }
-  render() {
-    if (this.#isSilent) {
-      return this;
-    }
-    this.clear();
-    this.#stream.write(this.frame());
-    this.#linesToClear = this.#lineCount;
-    return this;
-  }
-  start(text) {
-    if (text) {
-      this.text = text;
-    }
-    if (this.#isSilent) {
-      return this;
-    }
-    if (!this.#isEnabled) {
-      if (this.text) {
-        this.#stream.write(`- ${this.text}
-`);
-      }
-      return this;
-    }
-    if (this.isSpinning) {
-      return this;
-    }
-    if (this.#options.hideCursor) {
-      cli_cursor_default.hide(this.#stream);
-    }
-    if (this.#options.discardStdin && import_node_process6.default.stdin.isTTY) {
-      this.#isDiscardingStdin = true;
-      stdin_discarder_default.start();
-    }
-    this.render();
-    this.#id = setInterval(this.render.bind(this), this.interval);
-    return this;
-  }
-  stop() {
-    if (!this.#isEnabled) {
-      return this;
-    }
-    clearInterval(this.#id);
-    this.#id = void 0;
-    this.#frameIndex = 0;
-    this.clear();
-    if (this.#options.hideCursor) {
-      cli_cursor_default.show(this.#stream);
-    }
-    if (this.#options.discardStdin && import_node_process6.default.stdin.isTTY && this.#isDiscardingStdin) {
-      stdin_discarder_default.stop();
-      this.#isDiscardingStdin = false;
-    }
-    return this;
-  }
-  succeed(text) {
-    return this.stopAndPersist({ symbol: log_symbols_default.success, text });
-  }
-  fail(text) {
-    return this.stopAndPersist({ symbol: log_symbols_default.error, text });
-  }
-  warn(text) {
-    return this.stopAndPersist({ symbol: log_symbols_default.warning, text });
-  }
-  info(text) {
-    return this.stopAndPersist({ symbol: log_symbols_default.info, text });
-  }
-  stopAndPersist(options = {}) {
-    if (this.#isSilent) {
-      return this;
-    }
-    const prefixText = options.prefixText || this.#prefixText;
-    const fullPrefixText = this.getFullPrefixText(prefixText, " ");
-    const symbolText = options.symbol || " ";
-    const text = options.text || this.text;
-    const fullText = typeof text === "string" ? " " + text : "";
-    const suffixText = options.suffixText !== void 0 ? options.suffixText : this.#suffixText;
-    const fullSuffixText = this.getFullSuffixText(suffixText, " ");
-    const textToWrite = fullPrefixText + symbolText + fullText + fullSuffixText + "\n";
-    this.stop();
-    this.#stream.write(textToWrite);
-    return this;
-  }
-};
-function ora(options) {
-  return new Ora(options);
-}
-
-// src/index.js
-var import_figlet = __toESM(require_node_figlet());
-var import_gradient_string = __toESM(require_gradient_string());
-var import_promises = require("fs/promises");
-var import_fs = require("fs");
-var readline2 = __toESM(require("readline"));
-var import_process = require("process");
-var execAsync = (0, import_util.promisify)(import_child_process.exec);
+var { spawn, exec } = require("child_process");
+var { promisify } = require("util");
+var chalk2 = (init_source(), __toCommonJS(source_exports));
+var ora2 = (init_ora(), __toCommonJS(ora_exports));
+var figlet = require_node_figlet();
+var gradient = require_gradient_string();
+var { writeFile, readFile, access } = require("fs/promises");
+var { constants } = require("fs");
+var readline2 = require("readline");
+var { stdin, stdout, exit } = require("process");
+var execAsync = promisify(exec);
 var TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 var target = process.argv[2] || "my-nerv-app";
-console.log(import_figlet.default.textSync("NERV", {
+console.log(figlet.textSync("NERV", {
   font: "Big",
   horizontalLayout: "default",
   verticalLayout: "default"
 }));
-console.log(import_gradient_string.default.vice("\u26A1 Full stack serverless site launcher"));
-console.log(source_default.gray("Created by Creationbase.io"));
-console.log(source_default.magenta(`\u2192 Creating your project in: ${source_default.bold(target)}
+console.log(gradient.vice("\u26A1 Full stack serverless site launcher"));
+console.log(chalk2.gray("Created by Creationbase.io"));
+console.log(chalk2.magenta(`\u2192 Creating your project in: ${chalk2.bold(target)}
 `));
 function askQuestion(query) {
   const rl = readline2.createInterface({
-    input: import_process.stdin,
-    output: import_process.stdout
+    input: stdin,
+    output: stdout
   });
   return new Promise((resolve) => {
     rl.question(query, (answer) => {
@@ -10517,7 +10642,7 @@ function askQuestion(query) {
 }
 async function fileExists(path) {
   try {
-    await (0, import_promises.access)(path, import_fs.constants.F_OK);
+    await access(path, constants.F_OK);
     return true;
   } catch {
     return false;
@@ -10526,7 +10651,7 @@ async function fileExists(path) {
 async function runCommand(command, options = {}) {
   return new Promise((resolve, reject) => {
     const [cmd, ...args] = command.split(" ");
-    const child = (0, import_child_process.spawn)(cmd, args, {
+    const child = spawn(cmd, args, {
       stdio: options.quiet ? "pipe" : "inherit",
       shell: true,
       ...options
@@ -10558,32 +10683,32 @@ async function runCommand(command, options = {}) {
     try {
       await runCommand("git --version", { quiet: true });
     } catch (e) {
-      console.error(source_default.red("\u274C Git is required but not found. Please install Git and try again."));
-      (0, import_process.exit)(1);
+      console.error(chalk2.red("\u274C Git is required but not found. Please install Git and try again."));
+      exit(1);
     }
     try {
       await runCommand("npm --version", { quiet: true });
     } catch (e) {
-      console.error(source_default.red("\u274C npm is required but not found. Please install Node.js and npm."));
-      (0, import_process.exit)(1);
+      console.error(chalk2.red("\u274C npm is required but not found. Please install Node.js and npm."));
+      exit(1);
     }
     if (await fileExists(target)) {
-      console.error(source_default.red(`\u274C Directory '${target}' already exists. Please choose a different name or remove the existing directory.`));
-      (0, import_process.exit)(1);
+      console.error(chalk2.red(`\u274C Directory '${target}' already exists. Please choose a different name or remove the existing directory.`));
+      exit(1);
     }
-    const lang = await askQuestion(source_default.bold("Use TypeScript? [Y/n] "));
+    const lang = await askQuestion(chalk2.bold("Use TypeScript? [Y/n] "));
     const useTS = lang.trim().toLowerCase() === "y" || lang.trim() === "";
     console.log();
-    const cloneSpinner = ora("Cloning template...").start();
+    const cloneSpinner = ora2("Cloning template...").start();
     try {
       await runCommand(`git clone ${TEMPLATE_REPO} ${target}`, { quiet: true });
       cloneSpinner.succeed("\u2705 Template cloned.");
     } catch (e) {
       cloneSpinner.fail("\u274C Failed to clone the template.");
-      console.error(source_default.red("Error details:"), e.message);
-      (0, import_process.exit)(1);
+      console.error(chalk2.red("Error details:"), e.message);
+      exit(1);
     }
-    const cleanSpinner = ora("Cleaning up template...").start();
+    const cleanSpinner = ora2("Cleaning up template...").start();
     try {
       if (process.platform === "win32") {
         await runCommand(`rmdir /s /q "${target}\\.git"`, { quiet: true });
@@ -10593,11 +10718,11 @@ async function runCommand(command, options = {}) {
       cleanSpinner.succeed("\u{1F9FC} Cleanup complete.");
     } catch (e) {
       cleanSpinner.fail("\u274C Failed to clean up.");
-      console.error(source_default.red("Error details:"), e.message);
-      (0, import_process.exit)(1);
+      console.error(chalk2.red("Error details:"), e.message);
+      exit(1);
     }
     if (useTS) {
-      const tsSpinner = ora("Converting to TypeScript...").start();
+      const tsSpinner = ora2("Converting to TypeScript...").start();
       try {
         const appJsxPath = `${target}/src/app.jsx`;
         const mainJsxPath = `${target}/src/main.jsx`;
@@ -10618,9 +10743,9 @@ async function runCommand(command, options = {}) {
         const vitePath = `${target}/vite.config.js`;
         const viteTSPath = `${target}/vite.config.ts`;
         if (await fileExists(vitePath)) {
-          const viteContents = await (0, import_promises.readFile)(vitePath, "utf-8");
+          const viteContents = await readFile(vitePath, "utf-8");
           const viteTS = viteContents.replace(/\/\*\* @type \{import\("vite"\)\.UserConfig\} \*\//, "").replace("export default", "const config =").concat("\nexport default config;\n");
-          await (0, import_promises.writeFile)(viteTSPath, viteTS);
+          await writeFile(viteTSPath, viteTS);
           if (process.platform === "win32") {
             await runCommand(`del "${vitePath}"`, { quiet: true });
           } else {
@@ -10629,16 +10754,16 @@ async function runCommand(command, options = {}) {
         }
         const packageJsonPath = `${target}/package.json`;
         if (await fileExists(packageJsonPath)) {
-          const packageJson = JSON.parse(await (0, import_promises.readFile)(packageJsonPath, "utf-8"));
+          const packageJson = JSON.parse(await readFile(packageJsonPath, "utf-8"));
           packageJson.devDependencies = {
             ...packageJson.devDependencies,
             "typescript": "^5.0.0",
             "@types/react": "^18.0.0",
             "@types/react-dom": "^18.0.0"
           };
-          await (0, import_promises.writeFile)(packageJsonPath, JSON.stringify(packageJson, null, 2));
+          await writeFile(packageJsonPath, JSON.stringify(packageJson, null, 2));
         }
-        await (0, import_promises.writeFile)(
+        await writeFile(
           `${target}/tsconfig.json`,
           `{
   "compilerOptions": {
@@ -10660,42 +10785,42 @@ async function runCommand(command, options = {}) {
         tsSpinner.succeed("\u{1F537} TypeScript files prepared.");
       } catch (e) {
         tsSpinner.fail("\u274C TypeScript conversion failed.");
-        console.error(source_default.red("Error details:"), e.message);
-        (0, import_process.exit)(1);
+        console.error(chalk2.red("Error details:"), e.message);
+        exit(1);
       }
     }
-    console.log(source_default.greenBright("\n\u{1F680} All set!"));
-    console.log(import_gradient_string.default.vice("\nNext steps:"));
-    console.log(source_default.cyan(`  cd ${target}`));
-    console.log(source_default.cyan(`  npm install`));
-    console.log(source_default.cyan(`  npm run dev`));
-    console.log(import_gradient_string.default.vice("\nOr press Y below to run these now."));
-    const answer = await askQuestion(source_default.bold("\nRun setup now? [Y/n] "));
+    console.log(chalk2.greenBright("\n\u{1F680} All set!"));
+    console.log(gradient.vice("\nNext steps:"));
+    console.log(chalk2.cyan(`  cd ${target}`));
+    console.log(chalk2.cyan(`  npm install`));
+    console.log(chalk2.cyan(`  npm run dev`));
+    console.log(gradient.vice("\nOr press Y below to run these now."));
+    const answer = await askQuestion(chalk2.bold("\nRun setup now? [Y/n] "));
     if (answer.trim().toLowerCase() === "y" || answer.trim() === "") {
-      const runSpinner = ora("Installing dependencies...").start();
+      const runSpinner = ora2("Installing dependencies...").start();
       try {
         process.chdir(target);
         await runCommand("npm install");
         runSpinner.succeed("\u{1F4E6} Dependencies installed.");
-        console.log(source_default.greenBright("\nStarting development server..."));
-        console.log(source_default.gray("(Press Ctrl+C to stop)"));
+        console.log(chalk2.greenBright("\nStarting development server..."));
+        console.log(chalk2.gray("(Press Ctrl+C to stop)"));
         await runCommand("npm run dev");
       } catch (e) {
         runSpinner.fail("\u274C Setup failed.");
-        console.error(source_default.red("Error details:"), e.message);
-        (0, import_process.exit)(1);
+        console.error(chalk2.red("Error details:"), e.message);
+        exit(1);
       }
     } else {
-      console.log(source_default.greenBright("\n\u{1F44D} You can run these later:"));
-      console.log(source_default.magenta(`  cd ${target}`));
-      console.log(source_default.magenta(`  npm install`));
-      console.log(source_default.magenta(`  npm run dev`));
-      console.log(source_default.greenBright("\nHappy hacking!"));
-      (0, import_process.exit)(0);
+      console.log(chalk2.greenBright("\n\u{1F44D} You can run these later:"));
+      console.log(chalk2.magenta(`  cd ${target}`));
+      console.log(chalk2.magenta(`  npm install`));
+      console.log(chalk2.magenta(`  npm run dev`));
+      console.log(chalk2.greenBright("\nHappy hacking!"));
+      exit(0);
     }
   } catch (error) {
-    console.error(source_default.red("An unexpected error occurred:"), error.message || error);
-    (0, import_process.exit)(1);
+    console.error(chalk2.red("An unexpected error occurred:"), error.message || error);
+    exit(1);
   }
 })();
 /*! Bundled license information:
