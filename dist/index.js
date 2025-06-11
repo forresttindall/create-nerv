@@ -10619,11 +10619,7 @@ var { stdin, stdout, exit } = require("process");
 var execAsync = promisify(exec);
 var TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 var target = process.argv[2] || "my-nerv-app";
-console.log(figlet.textSync("NERV", {
-  font: "Big",
-  horizontalLayout: "default",
-  verticalLayout: "default"
-}));
+console.log(figlet.textSync("NERV"));
 console.log(gradient.vice("\u26A1 Full stack serverless site launcher"));
 console.log(chalk2.gray("Created by Creationbase.io"));
 console.log(chalk2.magenta(`\u2192 Creating your project in: ${chalk2.bold(target)}

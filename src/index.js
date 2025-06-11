@@ -17,7 +17,18 @@ const TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 const target = process.argv[2] || "my-nerv-app";
 
 
-console.log(figlet.textSync('NERV'));
+console.log(`
+  ███▄    █ ▓█████  ██▀███   ██▒   █▓
+  ██ ▀█   █ ▓█   ▀ ▓██ ▒ ██▒▓██░   █▒
+ ▓██  ▀█ ██▒▒███   ▓██ ░▄█ ▒ ▓██  █▒░
+ ▓██▒  ▐▌██▒▒▓█  ▄ ▒██▀▀█▄    ▒██ █░░
+ ▒██░   ▓██░░▒████▒░██▓ ▒██▒   ▒▀█░  
+ ░ ▒░   ▒ ▒ ░░ ▒░ ░░ ▒▓ ░▒▓░   ░ ▐░  
+ ░ ░░   ░ ▒░ ░ ░  ░  ░▒ ░ ▒░   ░ ░░  
+    ░   ░ ░    ░     ░░   ░      ░░  
+          ░    ░  ░   ░           ░  
+ `);
+ 
 
 console.log(gradient.vice("⚡ Full stack serverless site launcher"));
 console.log(chalk.gray("Created by Creationbase.io"));
