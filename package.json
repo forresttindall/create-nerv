@@ -1,6 +1,6 @@
 {
   "name": "create-nerv",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Create a new Nerv.js application",
   "main": "dist/index.js",
   "bin": {

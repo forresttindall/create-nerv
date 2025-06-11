@@ -1,20 +1,22 @@
 #!/usr/bin/env node
-import { spawn, exec } from "child_process";
-import { promisify } from "util";
-import chalk from "chalk";
-import ora from "ora";
-import figlet from "figlet";
-import gradient from "gradient-string";
-import { writeFile, readFile, access } from "fs/promises";
-import { constants } from "fs";
-import * as readline from 'readline';
-import { stdin, stdout, exit } from 'process';
+
+// Import statements converted to CommonJS require
+const { spawn, exec } = require("child_process");
+const { promisify } = require("util");
+const chalk = require("chalk");
+const ora = require("ora");
+const figlet = require("figlet");
+const gradient = require("gradient-string");
+const { writeFile, readFile, access } = require("fs/promises");
+const { constants } = require("fs");
+const readline = require('readline');
+const { stdin, stdout, exit } = require('process');
 
 const execAsync = promisify(exec);
 const TEMPLATE_REPO = "https://github.com/forresttindall/nerv.git";
 const target = process.argv[2] || "my-nerv-app";
 
-
+// Use figlet's built-in Big font instead of external file
 console.log(figlet.textSync('NERV', {
   font: 'Big', 
   horizontalLayout: 'default',
